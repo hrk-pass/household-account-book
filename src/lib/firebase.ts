@@ -2,14 +2,14 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
-// Firebase設定 - 後でFirebaseコンソールから取得した値に置き換えてください
+// Firebase設定
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCjt-fHJX26mEyaQ518hyaFPWLBAm14iTA",
+  authDomain: "household-account-book-17f5a.firebaseapp.com",
+  projectId: "household-account-book-17f5a",
+  storageBucket: "household-account-book-17f5a.firebasestorage.app",
+  messagingSenderId: "44518027909",
+  appId: "1:44518027909:web:58116a41a991d48d626fec"
 };
 
 // Firebase初期化
