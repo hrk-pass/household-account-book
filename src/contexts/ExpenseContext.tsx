@@ -1,22 +1,30 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
 import type { ReactNode } from 'react';
+import type { User } from 'firebase/auth';
 import type { AppState, AppAction, Expense, Category } from '../types';
+import { auth } from '../lib/firebase';
+import { expenseService, categoryService } from '../lib/firestore';
 
 // 初期状態
 const initialState: AppState = {
   expenses: [],
-  categories: [
-    { id: '1', name: '食費', color: '#FF6B6B' },
-    { id: '2', name: '交通費', color: '#4ECDC4' },
-    { id: '3', name: '娯楽', color: '#45B7D1' },
-    { id: '4', name: '日用品', color: '#96CEB4' },
-    { id: '5', name: 'その他', color: '#FCEA2B' },
-  ],
+  categories: [],
 };
 
 // Reducer関数
 function expenseReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
+    case 'SET_EXPENSES':
+      return {
+        ...state,
+        expenses: action.payload,
+      };
+    case 'SET_CATEGORIES':
+      return {
+        ...state,
+        categories: action.payload,
+      };
     case 'ADD_EXPENSE':
       return {
         ...state,
@@ -51,110 +59,155 @@ function expenseReducer(state: AppState, action: AppAction): AppState {
         ...state,
         categories: state.categories.filter(category => category.id !== action.payload),
       };
-    case 'SET_EXPENSES':
-      return {
-        ...state,
-        expenses: action.payload,
-      };
-    case 'SET_CATEGORIES':
-      return {
-        ...state,
-        categories: action.payload,
-      };
     default:
       return state;
   }
 }
 
-// コンテキストの型定義
+// Context型定義
 interface ExpenseContextType {
   state: AppState;
-  dispatch: React.Dispatch<AppAction>;
-  addExpense: (expense: Omit<Expense, 'id' | 'createdAt'>) => void;
-  updateExpense: (expense: Expense) => void;
-  deleteExpense: (id: string) => void;
-  addCategory: (category: Omit<Category, 'id'>) => void;
-  updateCategory: (category: Category) => void;
-  deleteCategory: (id: string) => void;
+  user: User | null;
+  loading: boolean;
+  addExpense: (expense: Omit<Expense, 'id'>) => Promise<void>;
+  updateExpense: (expense: Expense) => Promise<void>;
+  deleteExpense: (id: string) => Promise<void>;
+  addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
+  updateCategory: (category: Category) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
 }
 
-// コンテキストの作成
+// Context作成
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
 
-// プロバイダーコンポーネント
+// Provider実装
 export function ExpenseProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(expenseReducer, initialState);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // localStorage からデータを読み込み
+  // 認証状態を監視
   useEffect(() => {
-    const savedExpenses = localStorage.getItem('household-expenses');
-    const savedCategories = localStorage.getItem('household-categories');
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
+      setLoading(false);
 
-    if (savedExpenses) {
-      try {
-        const expenses = JSON.parse(savedExpenses);
-        dispatch({ type: 'SET_EXPENSES', payload: expenses });
-      } catch (error) {
-        console.error('Failed to load expenses from localStorage:', error);
+      if (user) {
+        // ログイン時にデフォルトカテゴリを初期化
+        try {
+          await categoryService.initializeDefaultCategories(user.uid);
+        } catch (error) {
+          console.error('デフォルトカテゴリ初期化エラー:', error);
+        }
+      } else {
+        // ログアウト時にstateをクリア
+        dispatch({ type: 'SET_EXPENSES', payload: [] });
+        dispatch({ type: 'SET_CATEGORIES', payload: [] });
       }
-    }
+    });
 
-    if (savedCategories) {
-      try {
-        const categories = JSON.parse(savedCategories);
-        dispatch({ type: 'SET_CATEGORIES', payload: categories });
-      } catch (error) {
-        console.error('Failed to load categories from localStorage:', error);
-      }
-    }
+    return () => unsubscribe();
   }, []);
 
-  // 状態変更時にlocalStorageに保存
+  // ユーザーが変わったときにFirestoreからデータを取得
   useEffect(() => {
-    localStorage.setItem('household-expenses', JSON.stringify(state.expenses));
-  }, [state.expenses]);
+    if (!user) return;
 
-  useEffect(() => {
-    localStorage.setItem('household-categories', JSON.stringify(state.categories));
-  }, [state.categories]);
+    let unsubscribeExpenses: (() => void) | undefined;
+    let unsubscribeCategories: (() => void) | undefined;
 
-  // ヘルパー関数
-  const addExpense = (expense: Omit<Expense, 'id' | 'createdAt'>) => {
-    const newExpense: Expense = {
-      ...expense,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString(),
+    try {
+      // 支出をリアルタイム監視
+      unsubscribeExpenses = expenseService.subscribeToExpenses(user.uid, (expenses) => {
+        dispatch({ type: 'SET_EXPENSES', payload: expenses });
+      });
+
+      // カテゴリをリアルタイム監視
+      unsubscribeCategories = categoryService.subscribeToCategories(user.uid, (categories) => {
+        dispatch({ type: 'SET_CATEGORIES', payload: categories });
+      });
+    } catch (error) {
+      console.error('データ監視エラー:', error);
+    }
+
+    return () => {
+      unsubscribeExpenses?.();
+      unsubscribeCategories?.();
     };
-    dispatch({ type: 'ADD_EXPENSE', payload: newExpense });
+  }, [user]);
+
+  // 支出操作
+  const addExpense = async (expense: Omit<Expense, 'id'>) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      await expenseService.addExpense(user.uid, expense);
+      // リアルタイム監視により自動的にstateが更新される
+    } catch (error) {
+      console.error('支出追加エラー:', error);
+      throw error;
+    }
   };
 
-  const updateExpense = (expense: Expense) => {
-    dispatch({ type: 'UPDATE_EXPENSE', payload: expense });
+  const updateExpense = async (expense: Expense) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      await expenseService.updateExpense(user.uid, expense.id, expense);
+      // リアルタイム監視により自動的にstateが更新される
+    } catch (error) {
+      console.error('支出更新エラー:', error);
+      throw error;
+    }
   };
 
-  const deleteExpense = (id: string) => {
-    dispatch({ type: 'DELETE_EXPENSE', payload: id });
+  const deleteExpense = async (id: string) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      await expenseService.deleteExpense(user.uid, id);
+      // リアルタイム監視により自動的にstateが更新される
+    } catch (error) {
+      console.error('支出削除エラー:', error);
+      throw error;
+    }
   };
 
-  const addCategory = (category: Omit<Category, 'id'>) => {
-    const newCategory: Category = {
-      ...category,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-    };
-    dispatch({ type: 'ADD_CATEGORY', payload: newCategory });
+  // カテゴリ操作
+  const addCategory = async (category: Omit<Category, 'id'>) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      await categoryService.addCategory(user.uid, category);
+      // リアルタイム監視により自動的にstateが更新される
+    } catch (error) {
+      console.error('カテゴリ追加エラー:', error);
+      throw error;
+    }
   };
 
-  const updateCategory = (category: Category) => {
-    dispatch({ type: 'UPDATE_CATEGORY', payload: category });
+  const updateCategory = async (category: Category) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      await categoryService.updateCategory(user.uid, category.id, category);
+      // リアルタイム監視により自動的にstateが更新される
+    } catch (error) {
+      console.error('カテゴリ更新エラー:', error);
+      throw error;
+    }
   };
 
-  const deleteCategory = (id: string) => {
-    dispatch({ type: 'DELETE_CATEGORY', payload: id });
+  const deleteCategory = async (id: string) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      await categoryService.deleteCategory(user.uid, id);
+      // リアルタイム監視により自動的にstateが更新される
+    } catch (error) {
+      console.error('カテゴリ削除エラー:', error);
+      throw error;
+    }
   };
 
   const value: ExpenseContextType = {
     state,
-    dispatch,
+    user,
+    loading,
     addExpense,
     updateExpense,
     deleteExpense,
@@ -170,7 +223,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// カスタムフック
+// Custom Hook
 export function useExpense() {
   const context = useContext(ExpenseContext);
   if (context === undefined) {

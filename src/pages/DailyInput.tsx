@@ -41,10 +41,11 @@ const DailyInput: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      addExpense({
+      await addExpense({
         date: formData.date,
         amount: amount,
         description: formData.description.trim(),
+        createdAt: new Date().toISOString(),
       });
 
       // 成功メッセージを表示

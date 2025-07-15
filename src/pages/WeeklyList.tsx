@@ -44,31 +44,43 @@ const WeeklyList: React.FC = () => {
   };
 
   // カテゴリーを更新
-  const handleCategoryChange = (expenseId: string, categoryId: string) => {
+  const handleCategoryChange = async (expenseId: string, categoryId: string) => {
     const expense = state.expenses.find(e => e.id === expenseId);
     if (expense) {
-      updateExpense({ ...expense, category: categoryId || undefined });
+      try {
+        await updateExpense({ ...expense, category: categoryId || undefined });
+      } catch (error) {
+        alert('カテゴリー更新に失敗しました');
+      }
     }
   };
 
   // 支出を削除
-  const handleDeleteExpense = (expenseId: string) => {
+  const handleDeleteExpense = async (expenseId: string) => {
     if (window.confirm('この支出を削除しますか？')) {
-      deleteExpense(expenseId);
+      try {
+        await deleteExpense(expenseId);
+      } catch (error) {
+        alert('削除に失敗しました');
+      }
     }
   };
 
   // 新しいカテゴリーを追加
-  const handleAddCategory = (e: React.FormEvent) => {
+  const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newCategoryName.trim()) {
-      addCategory({
-        name: newCategoryName.trim(),
-        color: newCategoryColor,
-      });
-      setNewCategoryName('');
-      setNewCategoryColor('#FF6B6B');
-      setShowCategoryModal(false);
+      try {
+        await addCategory({
+          name: newCategoryName.trim(),
+          color: newCategoryColor,
+        });
+        setNewCategoryName('');
+        setNewCategoryColor('#FF6B6B');
+        setShowCategoryModal(false);
+      } catch (error) {
+        alert('カテゴリー追加に失敗しました');
+      }
     }
   };
 

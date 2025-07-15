@@ -1,0 +1,164 @@
+/* 認証コンテナ */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+/* 認証カード */
+.auth-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.auth-card h1 {
+  color: #333;
+  margin-bottom: 16px;
+  font-size: 2rem;
+}
+
+.auth-card p {
+  color: #666;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+/* Googleログインボタン */
+.auth-button {
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  margin-bottom: 32px;
+}
+
+.auth-button:hover {
+  background: #3367d6;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.google-icon {
+  font-size: 1.2rem;
+}
+
+/* メリット表示 */
+.auth-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.benefit-item {
+  color: #4caf50;
+  font-weight: 500;
+  text-align: left;
+  padding: 8px 0;
+}
+
+/* ローディング */
+.auth-loading {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4285f4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ユーザー情報（ヘッダー用） */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: white;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-name {
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.logout-button {
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: #d32f2f;
+  transform: translateY(-1px);
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .auth-card {
+    padding: 24px;
+    margin: 20px;
+  }
+  
+  .user-info {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 16px;
+  }
+  
+  .user-name {
+    font-size: 0.8rem;
+  }
+} 

@@ -7,9 +7,9 @@ const Navigation: React.FC = () => {
 
   const navItems = [
     { path: '/', label: 'ホーム', icon: '🏠' },
-    { path: '/daily', label: '支出入力', icon: '➕' },
-    { path: '/weekly', label: '支出リスト', icon: '📋' },
-    { path: '/monthly', label: '月次集計', icon: '📊' },
+    { path: '/input', label: '支出入力', icon: '➕' },
+    { path: '/list', label: '支出リスト', icon: '📋' },
+    { path: '/summary', label: '月次集計', icon: '📊' },
   ];
 
   return (

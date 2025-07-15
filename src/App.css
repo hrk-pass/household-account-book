@@ -1,11 +1,41 @@
-.App {
+/* アプリ全体 */
+.app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.main-content {
+/* ヘッダー（ナビゲーション + ユーザー情報） */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* メインコンテンツ */
+.app-main {
   flex: 1;
+  background: #f8f9fa;
+  min-height: calc(100vh - 80px);
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .app-main {
+    min-height: calc(100vh - 120px);
+  }
 }
 
 /* リセットスタイル */
