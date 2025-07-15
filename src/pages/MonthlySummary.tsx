@@ -76,7 +76,7 @@ const MonthlySummaryPage: React.FC = () => {
       month: monthInfo.monthStr,
       totalAmount,
       categoryBreakdown: Array.from(categoryBreakdown.entries())
-        .map(([categoryId, data]) => ({
+        .map(([_, data]) => ({
           category: data.categoryName,
           amount: data.amount,
           count: data.count,

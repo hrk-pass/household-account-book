@@ -1,12 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useExpense } from '../contexts/ExpenseContext';
-import type { Expense, Category } from '../types';
+import type { Category } from '../types';
 import './WeeklyList.css';
 
 const WeeklyList: React.FC = () => {
   const { state, updateExpense, deleteExpense, addCategory } = useExpense();
   const [selectedWeekOffset, setSelectedWeekOffset] = useState(0); // 0 = 今週, -1 = 先週, 1 = 来週
-  const [editingExpense, setEditingExpense] = useState<string | null>(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryColor, setNewCategoryColor] = useState('#FF6B6B');
