@@ -64,21 +64,21 @@ const Auth: React.FC<AuthProps> = ({ user, loading }) => {
     return (
       <div className="auth-container">
         <div className="auth-card">
-          <h1>家計簿管理</h1>
-          <p>Googleアカウントでログインして、どの端末からでもアクセスできる家計簿を始めましょう。</p>
+          <h1>家計簿管理システム</h1>
+          <p>セキュアなGoogleアカウント連携により、どのデバイスからでも安全にアクセスできる家計簿システムをご利用いただけます。</p>
           <button onClick={handleSignIn} className="auth-button">
-            <span className="google-icon">🔑</span>
-            Googleでログイン
+            <span className="google-icon">⋄</span>
+            Googleアカウントでログイン
           </button>
           <div className="auth-benefits">
             <div className="benefit-item">
-              ✅ 複数端末でデータ同期
+              ◆ マルチデバイス対応データ同期
             </div>
             <div className="benefit-item">
-              ✅ データの自動バックアップ
+              ◆ 自動バックアップシステム
             </div>
             <div className="benefit-item">
-              ✅ 安全なクラウド保存
+              ◆ エンタープライズグレードセキュリティ
             </div>
           </div>
         </div>

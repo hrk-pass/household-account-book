@@ -8,7 +8,7 @@ const WeeklyList: React.FC = () => {
   const [selectedWeekOffset, setSelectedWeekOffset] = useState(0); // 0 = 今週, -1 = 先週, 1 = 来週
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryColor, setNewCategoryColor] = useState('#FF6B6B');
+  const [newCategoryColor, setNewCategoryColor] = useState('#c9a96e');
 
   // 選択された週の開始日と終了日を計算
   const getWeekRange = (offset: number) => {
@@ -75,8 +75,8 @@ const WeeklyList: React.FC = () => {
           name: newCategoryName.trim(),
           color: newCategoryColor,
         });
-        setNewCategoryName('');
-        setNewCategoryColor('#FF6B6B');
+            setNewCategoryName('');
+    setNewCategoryColor('#c9a96e');
         setShowCategoryModal(false);
       } catch (error) {
         alert('カテゴリー追加に失敗しました');
@@ -121,7 +121,7 @@ const WeeklyList: React.FC = () => {
   const totalAmount = weekExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
   const colorOptions = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FCEA2B',
+    '#c9a96e', '#4ECDC4', '#45B7D1', '#96CEB4', '#FCEA2B',
     '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
   ];
 

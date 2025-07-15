@@ -3,6 +3,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
 }
 
 /* ヘッダー（ナビゲーション + ユーザー情報） */
@@ -11,8 +12,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: rgba(45, 45, 45, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid #404040;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -21,7 +24,7 @@
 /* メインコンテンツ */
 .app-main {
   flex: 1;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   min-height: calc(100vh - 80px);
 }
 
@@ -45,10 +48,12 @@
 
 body {
   margin: 0;
-  font-family: 'Helvetica Neue', 'Arial', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+  font-family: "Playfair Display", "Cormorant Garamond", "Noto Serif JP", "Yu Mincho", "YuMincho", "Hiragino Mincho Pro", serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #e8e8e8;
+  letter-spacing: -0.01em;
 }
 
 /* グローバルスタイル */
@@ -66,15 +71,15 @@ input, textarea, select {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #2d2d2d;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #505050;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #606060;
 }

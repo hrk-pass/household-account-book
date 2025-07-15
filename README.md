@@ -1,46 +1,47 @@
-# 家計簿管理アプリ 💰
+# 家計簿管理システム
 
-React + TypeScript で作成した家計簿管理アプリケーションです。
+React + TypeScript で構築された高機能家計簿管理アプリケーションです。
 
-## 🌟 機能
+## 主要機能
 
-### 📝 日次支出入力画面
+### 日次支出入力画面
 - 日付、金額、支出内容の入力
 - クイック金額入力ボタン
 - よく使う項目のタグ機能
 - 入力成功時の視覚的フィードバック
 
-### 📋 週次リスト画面  
+### 週次リスト画面  
 - 支出のリスト表示（週別ナビゲーション）
 - カテゴリー登録機能
 - カテゴリー別集計表示
 - 新しいカテゴリーの追加
 - 支出の削除機能
 
-### 📊 月次集計画面
+### 月次集計画面
 - カテゴライズされた支出の集計結果
 - カテゴリー別内訳（パーセンテージ、金額、件数）
 - 日別支出推移グラフ
 - 前月比較機能
 - 支出分析とアドバイス
 
-### 🏠 ホーム画面
+### ホーム画面
 - ダッシュボード機能
 - 今日・今週・今月の支出サマリー
 - 最近の支出履歴
 - 各画面へのクイックアクセス
 
-## 🛠️ 技術スタック
+## 技術スタック
 
 - **Frontend**: React 18
 - **Language**: TypeScript
 - **Build Tool**: Vite
 - **Routing**: React Router v6
 - **State Management**: React Context API
-- **Storage**: localStorage
+- **Authentication**: Firebase Auth
+- **Database**: Firestore
 - **Styling**: CSS Modules
 
-## 🚀 セットアップ
+## セットアップ
 
 ### 前提条件
 - Node.js (推奨: v18以上)
@@ -76,45 +77,10 @@ npm run preview
 npm run lint
 ```
 
-## 💾 データ保存
+## データ保存
 
-アプリケーションはブラウザのlocalStorageを使用してデータを保存します。
-データは以下のキーで保存されます：
+アプリケーションはFirestoreを使用してデータを安全に保存します。
+データは以下のコレクションで管理されます：
 
-- `household-expenses`: 支出データ
-- `household-categories`: カテゴリーデータ
-
-## 🎨 デザイン
-
-- レスポンシブデザイン対応
-- モダンでクリーンなUI
-- モバイルフレンドリー
-- 直感的なユーザーエクスペリエンス
-
-## 📱 対応ブラウザ
-
-- Chrome (推奨)
-- Firefox
-- Safari
-- Edge
-
-## 🤝 コントリビューション
-
-1. このリポジトリをフォーク
-2. フィーチャーブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更をコミット (`git commit -m 'Add amazing feature'`)
-4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
-5. Pull Requestを作成
-
-## 📄 ライセンス
-
-このプロジェクトはMITライセンスの下で公開されています。
-
-## 🔗 デモ
-
-[ライブデモ](https://your-username.github.io/household-account-book)
-
----
-
-**作成者**: [あなたの名前]
-**作成日**: 2024年12月
+- `expenses`: 支出データ
+- `categories`: カテゴリーデータ

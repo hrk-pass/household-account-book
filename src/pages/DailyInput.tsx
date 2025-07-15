@@ -82,12 +82,12 @@ const DailyInput: React.FC = () => {
       <div className="daily-input-container">
         <header className="daily-input-header">
           <h1>支出入力</h1>
-          <p>日々の支出を記録しましょう</p>
+          <p>効率的な家計管理のための支出記録</p>
         </header>
 
         {showSuccess && (
           <div className="success-message">
-            ✅ 支出を記録しました！
+            ◆ 支出が正常に記録されました
           </div>
         )}
 
@@ -141,7 +141,7 @@ const DailyInput: React.FC = () => {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="何に使いましたか？"
+              placeholder="支出の詳細を入力してください"
               required
               className="form-textarea"
               rows={3}
@@ -183,9 +183,9 @@ const DailyInput: React.FC = () => {
         </form>
 
         <div className="form-tips">
-          <h3>💡 使い方のヒント</h3>
+          <h3>◆ 操作ガイド</h3>
           <ul>
-            <li>金額のクイック入力ボタンで素早く入力できます</li>
+            <li>金額のクイック入力ボタンで効率的に入力できます</li>
             <li>よく使う項目タグをクリックして内容を自動入力</li>
             <li>記録後は週次画面でカテゴリーを設定できます</li>
           </ul>

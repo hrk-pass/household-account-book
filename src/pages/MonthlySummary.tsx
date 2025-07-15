@@ -152,12 +152,12 @@ const MonthlySummaryPage: React.FC = () => {
         {/* 月次サマリー */}
         <div className="summary-cards">
           <div className="summary-card total">
-            <div className="summary-icon">💰</div>
+            <div className="summary-icon">◈</div>
             <div className="summary-content">
               <h3>総支出</h3>
               <p className="summary-amount">¥{monthlySummary.totalAmount.toLocaleString()}</p>
               <div className={`summary-change ${changeFromPrevious >= 0 ? 'increase' : 'decrease'}`}>
-                {changeFromPrevious >= 0 ? '↗' : '↘'} 
+                {changeFromPrevious >= 0 ? '▲' : '▼'} 
                 ¥{Math.abs(changeFromPrevious).toLocaleString()}
                 ({changePercentage > 0 ? '+' : ''}{changePercentage.toFixed(1)}%)
               </div>
@@ -165,7 +165,7 @@ const MonthlySummaryPage: React.FC = () => {
           </div>
 
           <div className="summary-card average">
-            <div className="summary-icon">📅</div>
+            <div className="summary-icon">●</div>
             <div className="summary-content">
               <h3>1日平均</h3>
               <p className="summary-amount">¥{averageDailyExpense.toLocaleString()}</p>
@@ -174,7 +174,7 @@ const MonthlySummaryPage: React.FC = () => {
           </div>
 
           <div className="summary-card categories">
-            <div className="summary-icon">📊</div>
+            <div className="summary-icon">◆</div>
             <div className="summary-content">
               <h3>カテゴリー数</h3>
               <p className="summary-amount">{monthlySummary.categoryBreakdown.length}</p>
@@ -291,7 +291,7 @@ const MonthlySummaryPage: React.FC = () => {
 
         {monthlySummary.totalAmount === 0 && (
           <div className="empty-state">
-            <h3>📈 支出データなし</h3>
+                          <h3>◆ 支出データなし</h3>
             <p>この月の支出データがありません。</p>
             <p>日次入力画面から支出を記録してみましょう。</p>
           </div>

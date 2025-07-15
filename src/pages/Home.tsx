@@ -33,24 +33,24 @@ const Home: React.FC = () => {
 
   const quickActions = [
     {
-      title: '支出を記録',
-      description: '今日の支出を素早く記録',
+      title: '支出記録',
+      description: '新規支出の記録・登録',
       link: '/daily',
-      icon: '➕',
-      color: '#FF6B6B'
+      icon: '＋',
+      color: '#c9a96e'
     },
     {
-      title: '支出を確認',
-      description: '週の支出リストを確認・編集',
+      title: '履歴確認',
+      description: '支出履歴の確認・管理',
       link: '/weekly',
-      icon: '📋',
+      icon: '≡',
       color: '#4ECDC4'
     },
     {
-      title: '月次レポート',
-      description: '月次の支出レポートを確認',
+      title: '統計分析',
+      description: '月次レポートと分析',
       link: '/monthly',
-      icon: '📊',
+      icon: '◈',
       color: '#45B7D1'
     }
   ];
@@ -59,13 +59,13 @@ const Home: React.FC = () => {
     <div className="home">
       <div className="home-container">
         <header className="home-header">
-          <h1>家計簿ダッシュボード</h1>
-          <p>支出を記録して、家計を管理しましょう</p>
+          <h1>支出管理ダッシュボード</h1>
+          <p>効率的な家計管理で、より良い財務計画を</p>
         </header>
 
         <div className="summary-cards">
           <div className="summary-card today">
-            <div className="summary-icon">📅</div>
+            <div className="summary-icon">●</div>
             <div className="summary-content">
               <h3>今日の支出</h3>
               <p className="summary-amount">¥{todayTotal.toLocaleString()}</p>
@@ -74,7 +74,7 @@ const Home: React.FC = () => {
           </div>
 
           <div className="summary-card week">
-            <div className="summary-icon">📝</div>
+            <div className="summary-icon">◆</div>
             <div className="summary-content">
               <h3>今週の支出</h3>
               <p className="summary-amount">¥{thisWeekTotal.toLocaleString()}</p>
@@ -83,7 +83,7 @@ const Home: React.FC = () => {
           </div>
 
           <div className="summary-card month">
-            <div className="summary-icon">📈</div>
+            <div className="summary-icon">◈</div>
             <div className="summary-content">
               <h3>今月の支出</h3>
               <p className="summary-amount">¥{currentMonthTotal.toLocaleString()}</p>
