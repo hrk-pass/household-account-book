@@ -13,9 +13,31 @@ const Auth: React.FC<AuthProps> = ({ user, loading }) => {
   const handleSignIn = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-    } catch (error) {
+    } catch (error: any) {
       console.error('ログインエラー:', error);
-      alert('ログインに失敗しました。もう一度お試しください。');
+      console.error('エラーコード:', error.code);
+      console.error('エラーメッセージ:', error.message);
+      
+      let errorMessage = 'ログインに失敗しました。';
+      
+      switch (error.code) {
+        case 'auth/popup-blocked':
+          errorMessage = 'ポップアップがブロックされました。ポップアップを許可してください。';
+          break;
+        case 'auth/popup-closed-by-user':
+          errorMessage = 'ログインがキャンセルされました。';
+          break;
+        case 'auth/unauthorized-domain':
+          errorMessage = 'このドメインは認証が許可されていません。Firebase設定を確認してください。';
+          break;
+        case 'auth/operation-not-allowed':
+          errorMessage = 'Google認証が有効になっていません。Firebase設定を確認してください。';
+          break;
+        default:
+          errorMessage = `ログインエラー: ${error.message}`;
+      }
+      
+      alert(errorMessage);
     }
   };
 
