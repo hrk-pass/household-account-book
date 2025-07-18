@@ -93,6 +93,26 @@
   box-shadow: none !important;
 }
 
+/* より強力なセレクタで暗い色を上書き */
+.meal-log-container .content .kitchen-expenses .expenses-section {
+  background: white !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* さらに具体的なセレクタ */
+div.meal-log div.meal-log-container div.content div.kitchen-expenses div.expenses-section {
+  background: white !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
 .expenses-section h3 {
   font-size: 1.3rem;
   color: #4682B4;
