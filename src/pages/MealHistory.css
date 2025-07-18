@@ -1,0 +1,359 @@
+.meal-history {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #EBF8FF 0%, #DBEAFE 100%);
+  padding: 20px;
+}
+
+.meal-history-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.meal-history-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.meal-history-header h1 {
+  font-size: 2.5rem;
+  color: #2C4A5C;
+  margin-bottom: 10px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-shadow: 0 1px 3px rgba(76, 144, 184, 0.1);
+}
+
+.meal-history-header p {
+  color: #5B7A8A;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* フィルター */
+.meal-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(240, 248, 255, 0.8);
+  border-radius: 15px;
+  border: 1px solid #D1E8F5;
+  box-shadow: 0 4px 12px rgba(76, 144, 184, 0.1);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-group label {
+  color: #2C4A5C;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.meal-type-filter {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-button {
+  padding: 8px 16px;
+  border: 2px solid #D1E8F5;
+  background: white;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  color: #2C4A5C;
+  box-shadow: 0 2px 4px rgba(76, 144, 184, 0.1);
+}
+
+.filter-button:hover {
+  border-color: #5B9BD5;
+  color: #4A90B8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(76, 144, 184, 0.15);
+}
+
+.filter-button.active {
+  background: #4A90B8;
+  border-color: #4A90B8;
+  color: white;
+  box-shadow: 0 4px 12px rgba(74, 144, 184, 0.3);
+}
+
+.date-filter {
+  padding: 8px 12px;
+  border: 2px solid #D1E8F5;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: white;
+  color: #2C4A5C;
+  transition: all 0.3s ease;
+}
+
+.date-filter:focus {
+  outline: none;
+  border-color: #4A90B8;
+  box-shadow: 0 0 0 3px rgba(74, 144, 184, 0.1);
+}
+
+.clear-date-button {
+  padding: 6px 12px;
+  background: #C4A484;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(196, 164, 132, 0.3);
+}
+
+.clear-date-button:hover {
+  background: #B49474;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(196, 164, 132, 0.4);
+}
+
+/* 食事記録一覧 */
+.meal-logs {
+  margin-bottom: 30px;
+}
+
+.date-group {
+  margin-bottom: 30px;
+}
+
+.date-header {
+  color: #2C4A5C;
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #D1E8F5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.meal-cards {
+  display: grid;
+  gap: 15px;
+}
+
+.meal-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(76, 144, 184, 0.1);
+  border: 1px solid #D1E8F5;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.meal-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(76, 144, 184, 0.15);
+  border-color: #B8DCF0;
+}
+
+.meal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.meal-card-header h4 {
+  color: #2C4A5C;
+  margin: 0;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meal-icon {
+  font-size: 1.2rem;
+}
+
+.meal-time {
+  color: #5B7A8A;
+  font-size: 0.9rem;
+  background: rgba(240, 248, 255, 0.6);
+  padding: 4px 8px;
+  border-radius: 10px;
+  border: 1px solid #D1E8F5;
+}
+
+.meal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ingredients-section,
+.notes-section {
+  border-top: 1px solid #D1E8F5;
+  padding-top: 15px;
+}
+
+.ingredients-section h5,
+.notes-section h5 {
+  color: #2C4A5C;
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+}
+
+.ingredients-list {
+  display: grid;
+  gap: 8px;
+}
+
+.ingredient-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(240, 248, 255, 0.4);
+  border-radius: 8px;
+  border: 1px solid #E8F4F8;
+}
+
+.ingredient-name {
+  color: #2C4A5C;
+  font-weight: 500;
+}
+
+.ingredient-price {
+  color: #4A90B8;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.meal-notes {
+  color: #5B7A8A;
+  margin: 0;
+  line-height: 1.6;
+  background: rgba(240, 248, 255, 0.6);
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #4A90B8;
+  border: 1px solid #D1E8F5;
+}
+
+/* データなし表示 */
+.no-logs {
+  text-align: center;
+  padding: 60px 20px;
+  color: #5B7A8A;
+  background: rgba(240, 248, 255, 0.6);
+  border-radius: 15px;
+  border: 1px solid #D1E8F5;
+}
+
+.no-logs p {
+  margin: 10px 0;
+  font-size: 1.1rem;
+}
+
+/* 統計情報 */
+.meal-stats {
+  background: rgba(240, 248, 255, 0.8);
+  border-radius: 15px;
+  padding: 20px;
+  border-left: 4px solid #4A90B8;
+  border: 1px solid #D1E8F5;
+  box-shadow: 0 4px 12px rgba(76, 144, 184, 0.1);
+}
+
+.meal-stats h3 {
+  color: #2C4A5C;
+  margin: 0 0 15px 0;
+  font-size: 1.2rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(76, 144, 184, 0.1);
+  border: 1px solid #D1E8F5;
+}
+
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4A90B8;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  color: #5B7A8A;
+  font-size: 0.9rem;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .meal-history {
+    padding: 10px;
+  }
+  
+  .meal-history-container {
+    padding: 20px;
+  }
+  
+  .meal-history-header h1 {
+    font-size: 2rem;
+  }
+  
+  .meal-filters {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .meal-type-filter {
+    justify-content: center;
+  }
+  
+  .meal-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .meal-time {
+    align-self: flex-end;
+  }
+  
+  .ingredient-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+  }
+  
+  .stat-number {
+    font-size: 1.5rem;
+  }
+} 

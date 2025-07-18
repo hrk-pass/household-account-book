@@ -250,6 +250,15 @@
   line-height: 1.5;
 }
 
+.form-help {
+  display: block;
+  margin-top: 0.5rem;
+  color: #999;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  font-style: italic;
+}
+
 @media (max-width: 768px) {
   .daily-input {
     padding: 1rem 0;

@@ -2,14 +2,15 @@ import { createContext, useContext, useReducer, useEffect, useState } from 'reac
 import { onAuthStateChanged } from 'firebase/auth';
 import type { ReactNode } from 'react';
 import type { User } from 'firebase/auth';
-import type { AppState, AppAction, Expense, Category } from '../types';
+import type { AppState, AppAction, Expense, Category, MealLog } from '../types';
 import { auth } from '../lib/firebase';
-import { expenseService, categoryService } from '../lib/firestore';
+import { expenseService, categoryService, mealLogService } from '../lib/firestore';
 
 // 初期状態
 const initialState: AppState = {
   expenses: [],
   categories: [],
+  mealLogs: [],
 };
 
 // Reducer関数
@@ -59,6 +60,28 @@ function expenseReducer(state: AppState, action: AppAction): AppState {
         ...state,
         categories: state.categories.filter(category => category.id !== action.payload),
       };
+    case 'SET_MEAL_LOGS':
+      return {
+        ...state,
+        mealLogs: action.payload,
+      };
+    case 'ADD_MEAL_LOG':
+      return {
+        ...state,
+        mealLogs: [...state.mealLogs, action.payload],
+      };
+    case 'UPDATE_MEAL_LOG':
+      return {
+        ...state,
+        mealLogs: state.mealLogs.map(mealLog =>
+          mealLog.id === action.payload.id ? action.payload : mealLog
+        ),
+      };
+    case 'DELETE_MEAL_LOG':
+      return {
+        ...state,
+        mealLogs: state.mealLogs.filter(mealLog => mealLog.id !== action.payload),
+      };
     default:
       return state;
   }
@@ -75,6 +98,9 @@ interface ExpenseContextType {
   addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
   updateCategory: (category: Category) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
+  addMealLog: (mealLog: Omit<MealLog, 'id'>) => Promise<void>;
+  updateMealLog: (mealLog: MealLog) => Promise<void>;
+  deleteMealLog: (id: string) => Promise<void>;
 }
 
 // Context作成
@@ -103,6 +129,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         // ログアウト時にstateをクリア
         dispatch({ type: 'SET_EXPENSES', payload: [] });
         dispatch({ type: 'SET_CATEGORIES', payload: [] });
+        dispatch({ type: 'SET_MEAL_LOGS', payload: [] });
       }
     });
 
@@ -115,6 +142,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
 
     let unsubscribeExpenses: (() => void) | undefined;
     let unsubscribeCategories: (() => void) | undefined;
+    let unsubscribeMealLogs: (() => void) | undefined;
 
     try {
       // 支出をリアルタイム監視
@@ -126,6 +154,11 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
       unsubscribeCategories = categoryService.subscribeToCategories(user.uid, (categories) => {
         dispatch({ type: 'SET_CATEGORIES', payload: categories });
       });
+
+      // 食事ログをリアルタイム監視
+      unsubscribeMealLogs = mealLogService.subscribeToMealLogs(user.uid, (mealLogs) => {
+        dispatch({ type: 'SET_MEAL_LOGS', payload: mealLogs });
+      });
     } catch (error) {
       console.error('データ監視エラー:', error);
     }
@@ -133,6 +166,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     return () => {
       unsubscribeExpenses?.();
       unsubscribeCategories?.();
+      unsubscribeMealLogs?.();
     };
   }, [user]);
 
@@ -204,6 +238,40 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // 食事ログ操作
+  const addMealLog = async (mealLog: Omit<MealLog, 'id'>) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      await mealLogService.addMealLog(user.uid, mealLog);
+      // リアルタイム監視により自動的にstateが更新される
+    } catch (error) {
+      console.error('食事ログ追加エラー:', error);
+      throw error;
+    }
+  };
+
+  const updateMealLog = async (mealLog: MealLog) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      await mealLogService.updateMealLog(user.uid, mealLog.id, mealLog);
+      // リアルタイム監視により自動的にstateが更新される
+    } catch (error) {
+      console.error('食事ログ更新エラー:', error);
+      throw error;
+    }
+  };
+
+  const deleteMealLog = async (id: string) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      await mealLogService.deleteMealLog(user.uid, id);
+      // リアルタイム監視により自動的にstateが更新される
+    } catch (error) {
+      console.error('食事ログ削除エラー:', error);
+      throw error;
+    }
+  };
+
   const value: ExpenseContextType = {
     state,
     user,
@@ -214,6 +282,9 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     addCategory,
     updateCategory,
     deleteCategory,
+    addMealLog,
+    updateMealLog,
+    deleteMealLog,
   };
 
   return (

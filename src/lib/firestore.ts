@@ -11,7 +11,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Expense, Category } from '../types';
+import type { Expense, Category, MealLog } from '../types';
 
 // ユーザーごとのコレクション名を取得
 const getUserCollection = (userId: string, collectionName: string) => {
@@ -188,6 +188,7 @@ export const categoryService = {
         { name: '交通費', color: '#4ECDC4' },
         { name: '娯楽', color: '#45B7D1' },
         { name: '日用品', color: '#96CEB4' },
+        { name: 'kitchen', color: '#FF8C69' },
         { name: 'その他', color: '#FCEA2B' }
       ];
 
@@ -198,5 +199,94 @@ export const categoryService = {
       console.error('デフォルトカテゴリ初期化エラー:', error);
       throw error;
     }
+  }
+};
+
+// 食事ログ関連の操作
+export const mealLogService = {
+  // 食事ログを追加
+  async addMealLog(userId: string, mealLog: Omit<MealLog, 'id'>): Promise<string> {
+    try {
+      const mealLogWithTimestamp = {
+        ...mealLog,
+        date: Timestamp.fromDate(new Date(mealLog.date))
+      };
+      const docRef = await addDoc(getUserCollection(userId, 'mealLogs'), mealLogWithTimestamp);
+      return docRef.id;
+    } catch (error) {
+      console.error('食事ログ追加エラー:', error);
+      throw error;
+    }
+  },
+
+  // 食事ログを更新
+  async updateMealLog(userId: string, mealLogId: string, updates: Partial<MealLog>): Promise<void> {
+    try {
+      const mealLogDoc = doc(getUserCollection(userId, 'mealLogs'), mealLogId);
+      const updatesWithTimestamp = updates.date 
+        ? { ...updates, date: Timestamp.fromDate(new Date(updates.date)) }
+        : updates;
+      await updateDoc(mealLogDoc, updatesWithTimestamp);
+    } catch (error) {
+      console.error('食事ログ更新エラー:', error);
+      throw error;
+    }
+  },
+
+  // 食事ログを削除
+  async deleteMealLog(userId: string, mealLogId: string): Promise<void> {
+    try {
+      const mealLogDoc = doc(getUserCollection(userId, 'mealLogs'), mealLogId);
+      await deleteDoc(mealLogDoc);
+    } catch (error) {
+      console.error('食事ログ削除エラー:', error);
+      throw error;
+    }
+  },
+
+  // 食事ログ一覧を取得
+  async getMealLogs(userId: string): Promise<MealLog[]> {
+    try {
+      const q = query(
+        getUserCollection(userId, 'mealLogs'),
+        orderBy('date', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.date.toDate().toISOString().split('T')[0] // Timestampを文字列に変換
+        } as MealLog;
+      });
+    } catch (error) {
+      console.error('食事ログ取得エラー:', error);
+      throw error;
+    }
+  },
+
+  // リアルタイムで食事ログを監視
+  subscribeToMealLogs(userId: string, callback: (mealLogs: MealLog[]) => void): () => void {
+    const q = query(
+      getUserCollection(userId, 'mealLogs'),
+      orderBy('date', 'desc')
+    );
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const mealLogs = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.date.toDate().toISOString().split('T')[0]
+        } as MealLog;
+      });
+      callback(mealLogs);
+    }, (error) => {
+      console.error('食事ログ監視エラー:', error);
+    });
+
+    return unsubscribe;
   }
 }; 

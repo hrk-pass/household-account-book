@@ -10,6 +10,9 @@ const Navigation: React.FC = () => {
     { path: '/input', label: '支出入力', icon: '＋' },
     { path: '/list', label: '支出リスト', icon: '≡' },
     { path: '/summary', label: '月次集計', icon: '◈' },
+    { path: '/meal-log', label: '食事Log', icon: '🍽' },
+    { path: '/meal-log-input', label: '食事入力', icon: '📝' },
+    { path: '/meal-history', label: '食事記録', icon: '📖' },
   ];
 
   return (

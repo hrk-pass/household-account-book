@@ -5,18 +5,19 @@ import './DailyInput.css';
 
 const DailyInput: React.FC = () => {
   const navigate = useNavigate();
-  const { addExpense } = useExpense();
+  const { state, addExpense } = useExpense();
   
   const [formData, setFormData] = useState({
     date: new Date().toISOString().slice(0, 10), // 今日の日付をデフォルト
     amount: '',
     description: '',
+    category: '',
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -41,12 +42,19 @@ const DailyInput: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      await addExpense({
+      const expenseData: any = {
         date: formData.date,
         amount: amount,
         description: formData.description.trim(),
         createdAt: new Date().toISOString(),
-      });
+      };
+
+      // カテゴリーが選択されている場合は追加
+      if (formData.category) {
+        expenseData.category = formData.category;
+      }
+
+      await addExpense(expenseData);
 
       // 成功メッセージを表示
       setShowSuccess(true);
@@ -56,6 +64,7 @@ const DailyInput: React.FC = () => {
         date: new Date().toISOString().slice(0, 10),
         amount: '',
         description: '',
+        category: '',
       });
 
       // 2秒後に成功メッセージを非表示
@@ -133,6 +142,27 @@ const DailyInput: React.FC = () => {
               ))}
             </div>
           </div>
+
+          {/* カテゴリー選択 */}
+          <div className="form-group">
+            <label htmlFor="category">カテゴリー（任意）</label>
+            <select
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="form-input"
+            >
+              <option value="">カテゴリーを選択...</option>
+              {state.categories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+
 
           <div className="form-group">
             <label htmlFor="description">支出内容</label>

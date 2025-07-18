@@ -6,6 +6,9 @@ import Home from './pages/Home';
 import DailyInput from './pages/DailyInput';
 import WeeklyList from './pages/WeeklyList';
 import MonthlySummaryPage from './pages/MonthlySummary';
+import MealLog from './pages/MealLog';
+import MealLogInput from './pages/MealLogInput';
+import MealHistory from './pages/MealHistory';
 import './App.css';
 
 // 認証が必要なページをラップするコンポーネント
@@ -31,6 +34,9 @@ function AuthenticatedApp() {
             <Route path="/input" element={<DailyInput />} />
             <Route path="/list" element={<WeeklyList />} />
             <Route path="/summary" element={<MonthlySummaryPage />} />
+            <Route path="/meal-log" element={<MealLog />} />
+            <Route path="/meal-log-input" element={<MealLogInput />} />
+            <Route path="/meal-history" element={<MealHistory />} />
           </Routes>
         </main>
       </Router>
