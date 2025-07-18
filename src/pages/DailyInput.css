@@ -93,8 +93,6 @@
 .form-textarea:focus {
   outline: none;
   border-color: #c9a96e;
-  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.2);
-  background: rgba(70, 70, 70, 0.9);
 }
 
 .form-input::placeholder,
@@ -204,23 +202,53 @@
   box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
 }
 
-.submit-button {
-  background: linear-gradient(135deg, #c9a96e 0%, #b8965c 100%);
-  color: #1a1a1a;
-  box-shadow: 0 4px 15px rgba(201, 169, 110, 0.3);
+.daily-input .submit-button {
+  background: linear-gradient(135deg, #c9a96e 0%, #b8965c 100%) !important;
+  color: #1a1a1a !important;
+  box-shadow: 0 4px 15px rgba(201, 169, 110, 0.3) !important;
+  border-color: #c9a96e !important;
 }
 
-.submit-button:hover:not(:disabled) {
+.daily-input .submit-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(201, 169, 110, 0.4);
-  background: linear-gradient(135deg, #d4b373 0%, #c9a96e 100%);
+  box-shadow: 0 6px 20px rgba(201, 169, 110, 0.4) !important;
+  background: linear-gradient(135deg, #d4b373 0%, #c9a96e 100%) !important;
+  border-color: #d4b373 !important;
 }
 
-.submit-button:disabled {
-  background: rgba(108, 117, 125, 0.5);
-  color: #666;
+.daily-input .submit-button:disabled {
+  background: rgba(108, 117, 125, 0.5) !important;
+  color: #666 !important;
   cursor: not-allowed;
-  box-shadow: none;
+  box-shadow: none !important;
+  border-color: rgba(108, 117, 125, 0.5) !important;
+}
+
+/* フォーム要素の青色スタイル上書き対策 */
+.daily-input .form-group label {
+  color: #c9a96e !important;
+}
+
+.daily-input .form-input {
+  border: 2px solid #404040 !important;
+  background: rgba(60, 60, 60, 0.8) !important;
+  color: #e8e8e8 !important;
+}
+
+.daily-input .form-input:focus {
+  border-color: #c9a96e !important;
+  box-shadow: none !important;
+}
+
+.daily-input .form-textarea {
+  border: 2px solid #404040 !important;
+  background: rgba(60, 60, 60, 0.8) !important;
+  color: #e8e8e8 !important;
+}
+
+.daily-input .form-textarea:focus {
+  border-color: #c9a96e !important;
+  box-shadow: none !important;
 }
 
 .form-tips {
@@ -277,7 +305,7 @@
   }
   
   .cancel-button,
-  .submit-button {
+  .daily-input .submit-button {
     width: 100%;
     justify-content: center;
   }

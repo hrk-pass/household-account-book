@@ -19,7 +19,7 @@
   margin-bottom: 30px;
 }
 
-.meal-log-header h1 {
+.meal-log .meal-log-header h1 {
   font-size: 2.5rem;
   color: #4682B4;
   margin-bottom: 10px;
@@ -28,13 +28,13 @@
   text-shadow: 0 1px 3px rgba(135, 206, 250, 0.2);
 }
 
-.meal-log-header p {
+.meal-log .meal-log-header p {
   color: #87CEEB;
   font-size: 1.1rem;
   margin: 0;
 }
 
-.content {
+.meal-log .content {
   color: #4682B4;
 }
 
@@ -50,7 +50,7 @@
   border: 1px solid rgba(135, 206, 250, 0.3);
 }
 
-.summary-item {
+.meal-log .summary-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -61,14 +61,14 @@
   border: 1px solid rgba(135, 206, 250, 0.2);
 }
 
-.summary-label {
+.meal-log .summary-label {
   font-size: 0.9rem;
   color: #87CEEB;
   margin-bottom: 5px;
   font-weight: 500;
 }
 
-.summary-value {
+.meal-log .summary-value {
   font-size: 1.5rem;
   font-weight: 600;
   color: #4682B4;
@@ -113,7 +113,7 @@ div.meal-log div.meal-log-container div.content div.kitchen-expenses div.expense
   box-shadow: none !important;
 }
 
-.expenses-section h3 {
+.meal-log .expenses-section h3 {
   font-size: 1.3rem;
   color: #4682B4;
   margin: 0 0 20px 0;
@@ -123,13 +123,13 @@ div.meal-log div.meal-log-container div.content div.kitchen-expenses div.expense
 }
 
 /* 明細リスト */
-.expenses-list {
+.meal-log .expenses-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.expense-item {
+.meal-log .expense-item {
   display: grid;
   grid-template-columns: auto 1fr auto auto;
   gap: 15px;
@@ -141,33 +141,33 @@ div.meal-log div.meal-log-container div.content div.kitchen-expenses div.expense
   transition: all 0.2s ease;
 }
 
-.expense-item:hover {
+.meal-log .expense-item:hover {
   background: #F8FBFF;
   border-color: #87CEEB;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(135, 206, 250, 0.15);
 }
 
-.expense-date {
+.meal-log .expense-date {
   font-size: 0.9rem;
   color: #87CEEB;
   font-weight: 500;
   min-width: 80px;
 }
 
-.expense-content {
+.meal-log .expense-content {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.expense-description {
+.meal-log .expense-description {
   font-size: 1rem;
   color: #4682B4;
   font-weight: 500;
 }
 
-.expense-amount {
+.meal-log .expense-amount {
   font-size: 1.1rem;
   font-weight: 600;
   color: #20B2AA;
