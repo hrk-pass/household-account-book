@@ -1,81 +1,34 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useExpense } from '../contexts/ExpenseContext';
-import type { KitchenSubCategory, FoodItem, Expense } from '../types';
 import './MealLog.css';
 
 const MealLog: React.FC = () => {
   const { state, updateExpense } = useExpense();
-  const [selectedSubCategory, setSelectedSubCategory] = useState<KitchenSubCategory | 'all'>('all');
-  const [editingExpense, setEditingExpense] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{
-    subCategory: KitchenSubCategory | '';
-  }>({
-    subCategory: '',
-  });
 
-  // kitchenカテゴリーの明細のみを取得
+  // カテゴリー「kitchen」の明細をフィルタリング（日付順）
   const kitchenExpenses = useMemo(() => {
-    return state.expenses.filter(expense => 
-      expense.category === 'kitchen'
-    );
+    return state.expenses
+      .filter(expense => expense.category === 'kitchen')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [state.expenses]);
 
-  // サブカテゴリーでフィルタリング
-  const filteredExpenses = useMemo(() => {
-    if (selectedSubCategory === 'all') {
-      return kitchenExpenses;
-    }
-    return kitchenExpenses.filter(expense => 
-      expense.subCategory === selectedSubCategory
-    );
-  }, [kitchenExpenses, selectedSubCategory]);
+  // サブカテゴリーの選択肢
+  const subCategoryOptions = ['食材', '調味料', '消耗品', 'その他'];
 
-  // 食材の消費率を計算（消費率が100%の食材は表示対象から除外）
-  const availableFoodItems = useMemo(() => {
-    return filteredExpenses
-      .filter(expense => 
-        expense.subCategory === '食材' && 
-        (expense.consumptionRate ?? 0) < 100
-      )
-      .map(expense => ({
-        ...expense,
-        consumptionRate: expense.consumptionRate ?? 0,
-        isConsumed: (expense.consumptionRate ?? 0) >= 100
-      } as FoodItem));
-  }, [filteredExpenses]);
-
-  const subCategories: (KitchenSubCategory | 'all')[] = ['all', '食材', '調味料', '消耗品', 'その他'];
-  const kitchenSubCategories: KitchenSubCategory[] = ['食材', '調味料', '消耗品', 'その他'];
-
-  // 編集開始
-  const startEdit = (expense: Expense) => {
-    setEditingExpense(expense.id);
-    setEditForm({
-      subCategory: (expense.subCategory as KitchenSubCategory) || '',
-    });
-  };
-
-  // 編集保存
-  const saveEdit = async (expense: Expense) => {
-    try {
-      await updateExpense({
-        ...expense,
-        subCategory: editForm.subCategory,
-      });
-      setEditingExpense(null);
-    } catch (error) {
-      console.error('更新エラー:', error);
-      alert('更新に失敗しました');
+  // サブカテゴリーを更新
+  const handleSubCategoryChange = async (expenseId: string, subCategory: string) => {
+    const expense = state.expenses.find(e => e.id === expenseId);
+    if (expense) {
+      try {
+        await updateExpense({ ...expense, subCategory: subCategory || undefined });
+      } catch (error) {
+        alert('サブカテゴリー更新に失敗しました');
+      }
     }
   };
 
-  // 編集キャンセル
-  const cancelEdit = () => {
-    setEditingExpense(null);
-    setEditForm({
-      subCategory: '',
-    });
-  };
+  // 総額を計算
+  const totalAmount = kitchenExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
   return (
     <div className="meal-log">
@@ -85,161 +38,79 @@ const MealLog: React.FC = () => {
           <p>キッチン用品と食材の管理</p>
         </header>
 
-        {/* サブカテゴリーフィルター */}
-        <div className="sub-category-filter">
-          <h3>カテゴリー選択</h3>
-          <div className="filter-buttons">
-            {subCategories.map((subCat) => (
-              <button
-                key={subCat}
-                className={`filter-button ${selectedSubCategory === subCat ? 'active' : ''}`}
-                onClick={() => setSelectedSubCategory(subCat)}
-              >
-                {subCat === 'all' ? '全て' : subCat}
-              </button>
-            ))}
+        <div className="content">
+          {/* サマリー情報 */}
+          <div className="kitchen-summary">
+            <div className="summary-item">
+              <span className="summary-label">総支出</span>
+              <span className="summary-value">¥{totalAmount.toLocaleString()}</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">明細件数</span>
+              <span className="summary-value">{kitchenExpenses.length}件</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">サブカテゴリー数</span>
+              <span className="summary-value">
+                {new Set(kitchenExpenses.map(e => e.subCategory).filter(Boolean)).size}分類
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* 明細表示 */}
-        <div className="expense-list">
-          <h3>
-            {selectedSubCategory === 'all' ? 'キッチン関連' : selectedSubCategory}明細 
-            ({filteredExpenses.length}件)
-          </h3>
-          
-          {filteredExpenses.length === 0 ? (
-            <div className="no-data">
-              <p>該当する明細がありません</p>
+          {/* 明細リスト */}
+          {kitchenExpenses.length > 0 ? (
+            <div className="kitchen-expenses">
+              <div className="expenses-section">
+                <h3>キッチン明細一覧（日付順）</h3>
+                
+                <div className="expenses-list">
+                  {kitchenExpenses.map((expense) => (
+                    <div key={expense.id} className="expense-item">
+                      <div className="expense-date">
+                        {new Date(expense.date).toLocaleDateString('ja-JP', {
+                          month: 'short',
+                          day: 'numeric',
+                          weekday: 'short'
+                        })}
+                      </div>
+                      <div className="expense-content">
+                        <div className="expense-description">{expense.description}</div>
+                        <div className="expense-amount">¥{expense.amount.toLocaleString()}</div>
+                      </div>
+                      
+                      {/* サブカテゴリー設定 */}
+                      <div className="expense-subcategory">
+                        <select
+                          value={expense.subCategory || ''}
+                          onChange={(e) => handleSubCategoryChange(expense.id, e.target.value)}
+                          className="subcategory-select"
+                        >
+                          <option value="">未設定</option>
+                          {subCategoryOptions.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* 消費率表示 */}
+                      {expense.consumptionRate !== undefined && (
+                        <div className="consumption-rate">
+                          <span className="rate-label">消費率</span>
+                          <span className="rate-value">{expense.consumptionRate}%</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
-            <div className="expense-items">
-              {filteredExpenses.map((expense) => (
-                <div key={expense.id} className="expense-item">
-                  {editingExpense === expense.id ? (
-                    // 編集モード
-                    <div className="expense-edit-form">
-                      <div className="edit-header">
-                        <h4>{expense.description}</h4>
-                        <p>¥{expense.amount.toLocaleString()} | {expense.date}</p>
-                      </div>
-                      
-                      <div className="edit-fields">
-                        <div className="edit-field">
-                          <label>サブカテゴリー</label>
-                          <select
-                            value={editForm.subCategory}
-                            onChange={(e) => setEditForm(prev => ({ 
-                              ...prev, 
-                              subCategory: e.target.value as KitchenSubCategory 
-                            }))}
-                            className="edit-select"
-                          >
-                            <option value="">選択してください</option>
-                            {kitchenSubCategories.map((subCat) => (
-                              <option key={subCat} value={subCat}>
-                                {subCat}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-
-                      </div>
-
-                      <div className="edit-actions">
-                        <button
-                          onClick={() => saveEdit(expense)}
-                          className="save-button"
-                        >
-                          保存
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          className="cancel-edit-button"
-                        >
-                          キャンセル
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    // 表示モード
-                    <div className="expense-info">
-                      <div className="expense-details">
-                        <h4>{expense.description}</h4>
-                        <p className="expense-meta">
-                          {expense.date} | ¥{expense.amount.toLocaleString()}
-                          {expense.subCategory ? (
-                            <span className="sub-category-tag">
-                              {expense.subCategory}
-                            </span>
-                          ) : (
-                            <span className="no-subcategory-tag">
-                              未設定
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                      
-                      <div className="expense-actions">
-                        {expense.subCategory === '食材' && (
-                          <div className="consumption-info">
-                            <div className="consumption-rate">
-                              <span>消費率: {expense.consumptionRate ?? 0}%</span>
-                              <div className="consumption-bar">
-                                <div 
-                                  className="consumption-fill"
-                                  style={{ width: `${expense.consumptionRate ?? 0}%` }}
-                                />
-                              </div>
-                            </div>
-                            {(expense.consumptionRate ?? 0) >= 100 && (
-                              <span className="consumed-badge">消費済み</span>
-                            )}
-                          </div>
-                        )}
-                        
-                        <button
-                          onClick={() => startEdit(expense)}
-                          className="edit-button"
-                        >
-                          設定
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="empty-state">
+              <p>カテゴリー「kitchen」の明細がありません</p>
+              <p>支出入力でカテゴリーを「kitchen」に設定してください</p>
             </div>
           )}
         </div>
-
-        {/* 食材使用可能リスト */}
-        {selectedSubCategory === '食材' || selectedSubCategory === 'all' ? (
-          <div className="available-ingredients">
-            <h3>使用可能な食材 ({availableFoodItems.length}件)</h3>
-            {availableFoodItems.length === 0 ? (
-              <div className="no-data">
-                <p>使用可能な食材がありません</p>
-              </div>
-            ) : (
-              <div className="ingredient-grid">
-                {availableFoodItems.map((item) => (
-                  <div key={item.id} className="ingredient-card">
-                    <h4>{item.description}</h4>
-                    <p>残り: {100 - item.consumptionRate}%</p>
-                    <div className="consumption-bar small">
-                      <div 
-                        className="consumption-fill"
-                        style={{ width: `${item.consumptionRate}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : null}
       </div>
     </div>
   );
