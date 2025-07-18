@@ -1,16 +1,17 @@
 .meal-log {
   min-height: 100vh;
-  background: linear-gradient(135deg, #E6F3FF 0%, #B8E6FF 100%);
+  background: linear-gradient(135deg, #F0F8FF 0%, #E6F3FF 100%);
   padding: 20px;
 }
 
 .meal-log-container {
   max-width: 1200px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 20px;
   padding: 30px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 35px rgba(135, 206, 250, 0.15);
+  border: 1px solid rgba(135, 206, 250, 0.2);
 }
 
 .meal-log-header {
@@ -20,363 +21,218 @@
 
 .meal-log-header h1 {
   font-size: 2.5rem;
-  color: #2C4A5C;
+  color: #4682B4;
   margin-bottom: 10px;
   font-weight: 300;
   letter-spacing: 2px;
-  text-shadow: 0 1px 3px rgba(76, 144, 184, 0.1);
+  text-shadow: 0 1px 3px rgba(135, 206, 250, 0.2);
 }
 
 .meal-log-header p {
-  color: #5B7A8A;
+  color: #87CEEB;
   font-size: 1.1rem;
   margin: 0;
 }
 
-/* サブカテゴリーフィルター */
-.sub-category-filter {
-  margin-bottom: 30px;
+.content {
+  color: #4682B4;
 }
 
-.sub-category-filter h3 {
-  color: #2C4A5C;
-  margin-bottom: 15px;
-  font-size: 1.2rem;
-}
-
-.filter-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.filter-button {
-  padding: 8px 16px;
-  border: 2px solid #D1E8F5;
-  background: white;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-  color: #2C4A5C;
-  box-shadow: 0 2px 4px rgba(76, 144, 184, 0.1);
-}
-
-.filter-button:hover {
-  border-color: #5B9BD5;
-  color: #4A90B8;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(76, 144, 184, 0.15);
-}
-
-.filter-button.active {
-  background: #4A90B8;
-  border-color: #4A90B8;
-  color: white;
-  box-shadow: 0 4px 12px rgba(74, 144, 184, 0.3);
-}
-
-/* 明細表示 */
-.expense-list {
-  margin-bottom: 30px;
-}
-
-.expense-list h3 {
-  color: #2C4A5C;
-  margin-bottom: 20px;
-  font-size: 1.3rem;
-  border-bottom: 2px solid #D1E8F5;
-  padding-bottom: 10px;
-}
-
-.expense-items {
+/* キッチンサマリー */
+.kitchen-summary {
   display: grid;
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: linear-gradient(135deg, #F8FBFF 0%, #F0F8FF 100%);
+  border-radius: 15px;
+  border: 1px solid rgba(135, 206, 250, 0.3);
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(135, 206, 250, 0.1);
+  border: 1px solid rgba(135, 206, 250, 0.2);
+}
+
+.summary-label {
+  font-size: 0.9rem;
+  color: #87CEEB;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #4682B4;
+}
+
+/* キッチン明細セクション */
+.kitchen-expenses {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(135, 206, 250, 0.1);
+  border: 1px solid rgba(135, 206, 250, 0.2);
+}
+
+/* 食事Logページ専用のexpenses-sectionスタイル（WeeklyList.cssの暗い色を上書き） */
+.meal-log .expenses-section {
+  background: white !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.expenses-section h3 {
+  font-size: 1.3rem;
+  color: #4682B4;
+  margin: 0 0 20px 0;
+  font-weight: 600;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #E6F3FF;
+}
+
+/* 明細リスト */
+.expenses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .expense-item {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(76, 144, 184, 0.1);
-  border: 1px solid #D1E8F5;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 15px;
+  align-items: center;
+  padding: 15px;
+  background: #FAFBFC;
+  border-radius: 10px;
+  border: 1px solid rgba(135, 206, 250, 0.2);
+  transition: all 0.2s ease;
 }
 
 .expense-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(76, 144, 184, 0.15);
-  border-color: #B8DCF0;
+  background: #F8FBFF;
+  border-color: #87CEEB;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(135, 206, 250, 0.15);
 }
 
-.expense-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-}
-
-.expense-details h4 {
-  color: #2C4A5C;
-  margin: 0 0 5px 0;
-  font-size: 1.1rem;
-}
-
-.expense-meta {
-  color: #5B7A8A;
-  margin: 0;
+.expense-date {
   font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  color: #87CEEB;
+  font-weight: 500;
+  min-width: 80px;
 }
 
-.sub-category-tag {
-  background: #4A90B8;
-  color: white;
-  padding: 3px 8px;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  box-shadow: 0 2px 4px rgba(74, 144, 184, 0.2);
-}
-
-/* 消費率表示 */
-.consumption-info {
+.expense-content {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-  min-width: 200px;
+  gap: 4px;
+}
+
+.expense-description {
+  font-size: 1rem;
+  color: #4682B4;
+  font-weight: 500;
+}
+
+.expense-amount {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #20B2AA;
+}
+
+/* サブカテゴリー設定 */
+.expense-subcategory {
+  min-width: 120px;
+}
+
+.subcategory-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(135, 206, 250, 0.3);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  color: #4682B4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.subcategory-select:hover {
+  border-color: #87CEEB;
+  background: #F8FBFF;
+}
+
+.subcategory-select:focus {
+  outline: none;
+  border-color: #20B2AA;
+  box-shadow: 0 0 0 2px rgba(32, 178, 170, 0.2);
+  background: white;
+}
+
+.subcategory-select option {
+  padding: 8px;
+  background: white;
+  color: #4682B4;
+}
+
+.subcategory-select option:hover {
+  background: #F8FBFF;
 }
 
 .consumption-rate {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
+  align-items: center;
+  gap: 2px;
+  min-width: 60px;
 }
 
-.consumption-rate span {
-  font-size: 0.9rem;
-  color: #2C4A5C;
+.rate-label {
+  font-size: 0.7rem;
+  color: #87CEEB;
   font-weight: 500;
 }
 
-.consumption-bar {
-  width: 150px;
-  height: 8px;
-  background: #E8F4F8;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid #D1E8F5;
-}
-
-.consumption-bar.small {
-  width: 100px;
-  height: 6px;
-}
-
-.consumption-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #2ecc71 0%, #f39c12 50%, #e74c3c 100%);
-  transition: width 0.3s ease;
-}
-
-.consumed-badge {
-  background: #e74c3c;
-  color: white;
-  padding: 4px 8px;
+.rate-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #FF6B6B;
+  background: #FFF5F5;
+  padding: 2px 8px;
   border-radius: 10px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  border: 1px solid #FFE0E0;
 }
 
-/* 使用可能な食材 */
-.available-ingredients {
-  margin-top: 30px;
-}
-
-.available-ingredients h3 {
-  color: #2C4A5C;
-  margin-bottom: 20px;
-  font-size: 1.3rem;
-  border-bottom: 2px solid #D1E8F5;
-  padding-bottom: 10px;
-}
-
-.ingredient-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.ingredient-card {
-  background: white;
-  border-radius: 15px;
-  padding: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e0e6ed;
-  transition: all 0.3s ease;
-}
-
-.ingredient-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.ingredient-card h4 {
-  color: #2c3e50;
-  margin: 0 0 10px 0;
-  font-size: 1rem;
-}
-
-.ingredient-card p {
-  color: #7f8c8d;
-  margin: 0 0 10px 0;
-  font-size: 0.9rem;
-}
-
-/* 編集機能 */
-.expense-edit-form {
-  background: #F0F8FF;
-  border-radius: 10px;
-  padding: 20px;
-  border: 2px solid #4A90B8;
-  box-shadow: 0 4px 12px rgba(74, 144, 184, 0.15);
-}
-
-.edit-header h4 {
-  color: #2C4A5C;
-  margin: 0 0 5px 0;
-  font-size: 1.1rem;
-}
-
-.edit-header p {
-  color: #5B7A8A;
-  margin: 0 0 15px 0;
-  font-size: 0.9rem;
-}
-
-.edit-fields {
-  display: grid;
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.edit-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.edit-field label {
-  color: #2C4A5C;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.edit-select {
-  padding: 8px 12px;
-  border: 2px solid #D1E8F5;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  background: white;
-  color: #2C4A5C;
-  transition: all 0.3s ease;
-}
-
-.edit-select:focus {
-  outline: none;
-  border-color: #4A90B8;
-  box-shadow: 0 0 0 3px rgba(74, 144, 184, 0.1);
-}
-
-.edit-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.save-button, .cancel-edit-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.save-button {
-  background: #4A90B8;
-  color: white;
-  box-shadow: 0 2px 6px rgba(74, 144, 184, 0.3);
-}
-
-.save-button:hover {
-  background: #3A7FA8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 144, 184, 0.4);
-}
-
-.cancel-edit-button {
-  background: #8BB6C8;
-  color: white;
-  box-shadow: 0 2px 6px rgba(139, 182, 200, 0.3);
-}
-
-.cancel-edit-button:hover {
-  background: #7BA6B8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 182, 200, 0.4);
-}
-
-.expense-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-  min-width: 200px;
-}
-
-.edit-button {
-  padding: 6px 12px;
-  background: #5B9BD5;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(91, 155, 213, 0.3);
-}
-
-.edit-button:hover {
-  background: #4A8BC2;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(91, 155, 213, 0.4);
-}
-
-.no-subcategory-tag {
-  background: #C4A484;
-  color: white;
-  padding: 3px 8px;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  box-shadow: 0 2px 4px rgba(196, 164, 132, 0.3);
-}
-
-/* データなし表示 */
-.no-data {
+/* 空の状態 */
+.empty-state {
   text-align: center;
-  padding: 40px;
-  color: #7f8c8d;
+  padding: 60px 20px;
+  color: #87CEEB;
 }
 
-.no-data p {
-  margin: 0;
+.empty-state p {
   font-size: 1.1rem;
+  margin: 10px 0;
+}
+
+.empty-state p:first-child {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #87CEEB;
 }
 
 /* レスポンシブ対応 */
@@ -393,26 +249,27 @@
     font-size: 2rem;
   }
   
-  .expense-info {
-    flex-direction: column;
+  .kitchen-summary {
+    grid-template-columns: 1fr;
     gap: 15px;
+    padding: 15px;
   }
   
-  .consumption-info {
-    align-items: flex-start;
+  .expense-item {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .expense-date {
     min-width: auto;
   }
   
-  .ingredient-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-  
-  .expense-actions {
-    align-items: flex-start;
+  .expense-subcategory {
     min-width: auto;
   }
   
-  .edit-actions {
-    justify-content: center;
+  .consumption-rate {
+    min-width: auto;
   }
 } 
