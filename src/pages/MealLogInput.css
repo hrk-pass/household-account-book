@@ -134,6 +134,84 @@
   box-shadow: 0 4px 12px rgba(135, 206, 250, 0.3);
 }
 
+/* 食材使用状況選択セクション */
+.usage-mode-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(240, 248, 255, 0.8);
+  border-radius: 15px;
+  border: 1px solid rgba(135, 206, 250, 0.3);
+  box-shadow: 0 4px 12px rgba(135, 206, 250, 0.1);
+}
+
+.meal-log-input .usage-mode-section h3 {
+  color: #4682B4;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.usage-mode-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.meal-log-input .usage-mode-button {
+  padding: 15px 30px;
+  border: 2px solid rgba(135, 206, 250, 0.3);
+  background: white;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  color: #4682B4;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(135, 206, 250, 0.1);
+  min-width: 140px;
+  text-align: center;
+}
+
+.meal-log-input .usage-mode-button:hover {
+  border-color: #87CEEB;
+  color: #4682B4;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(135, 206, 250, 0.2);
+}
+
+.meal-log-input .usage-mode-button.active {
+  background: #87CEEB;
+  border-color: #87CEEB;
+  color: white;
+  box-shadow: 0 6px 18px rgba(135, 206, 250, 0.4);
+  transform: translateY(-2px);
+}
+
+/* 食材未使用時のメッセージ */
+.unused-message {
+  margin-bottom: 30px;
+  padding: 25px;
+  background: linear-gradient(135deg, #F0F8FF 0%, #E6F3FF 100%);
+  border-radius: 15px;
+  border: 2px solid rgba(135, 206, 250, 0.3);
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(135, 206, 250, 0.1);
+}
+
+.meal-log-input .unused-message p {
+  margin: 10px 0;
+  color: #4682B4;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.meal-log-input .unused-message p:first-child {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #87CEEB;
+}
+
 /* 食材セクション */
 .ingredients-section {
   margin-bottom: 30px;
