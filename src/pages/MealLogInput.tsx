@@ -82,7 +82,7 @@ const MealLogInput: React.FC = () => {
         date: selectedDate,
         mealType: selectedMealType,
         ingredients: isUnused ? [] : Object.keys(consumptionUpdates),
-        notes: mealNotes || undefined,
+        ...(mealNotes ? { notes: mealNotes } : {}),
         createdAt: new Date().toISOString(),
       });
 

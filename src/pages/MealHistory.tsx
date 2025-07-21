@@ -1,233 +1,203 @@
-import React, { useState, useMemo } from 'react';
-import { useExpense } from '../contexts/ExpenseContext';
-import type { MealType, MealLog } from '../types';
+import { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { getAuth } from 'firebase/auth';
 import './MealHistory.css';
 
-const MealHistory: React.FC = () => {
-  const { state } = useExpense();
-  const [selectedMealType, setSelectedMealType] = useState<MealType | 'all'>('all');
-  const [selectedDate, setSelectedDate] = useState('');
+import type { MealLog } from '../types';
 
-  // 食事ログをフィルタリング
-  const filteredMealLogs = useMemo(() => {
-    let logs = state.mealLogs;
+type MealData = {
+  id: string;
+  date: string;
+  mealType: string;
+  ingredients: string[];
+  notes?: string;
+};
 
-    // 食事タイプでフィルタリング
-    if (selectedMealType !== 'all') {
-      logs = logs.filter(log => log.mealType === selectedMealType);
-    }
+const MealHistory = () => {
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [mealDates, setMealDates] = useState<Set<string>>(new Set());
+  const [selectedDateMeals, setSelectedDateMeals] = useState<MealData[]>([]);
+  const auth = getAuth();
 
-    // 日付でフィルタリング
-    if (selectedDate) {
-      logs = logs.filter(log => log.date === selectedDate);
-    }
-
-    return logs;
-  }, [state.mealLogs, selectedMealType, selectedDate]);
-
-  // 使用した食材の詳細を取得
-  const getIngredientDetails = (ingredientIds: string[]) => {
-    return ingredientIds
-      .map(id => state.expenses.find(expense => expense.id === id))
-      .filter(expense => expense !== undefined);
+  // Firestoreのタイムスタンプを日付文字列（YYYY-MM-DD）に変換する関数
+  const convertTimestampToDateString = (timestamp: any): string => {
+    if (!timestamp || !timestamp.seconds) return '';
+    const date = new Date(timestamp.seconds * 1000);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
-  // 日付でグループ化
-  const groupedLogs = useMemo(() => {
-    const groups: { [date: string]: MealLog[] } = {};
-    filteredMealLogs.forEach(log => {
-      if (!groups[log.date]) {
-        groups[log.date] = [];
+  useEffect(() => {
+    const fetchMealDates = async () => {
+      if (!auth.currentUser) {
+        console.log('ユーザーが認証されていません');
+        return;
       }
-      groups[log.date].push(log);
-    });
-    
-    // 日付順でソート（新しい順）
-    const sortedDates = Object.keys(groups).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-    const sortedGroups: { [date: string]: MealLog[] } = {};
-    sortedDates.forEach(date => {
-      // 各日付内で食事タイプ順にソート
-      const mealTypeOrder: { [key in MealType]: number } = {
-        '朝食': 1,
-        '昼食': 2,
-        '夕食': 3,
-        '間食': 4
-      };
-      groups[date].sort((a, b) => mealTypeOrder[a.mealType] - mealTypeOrder[b.mealType]);
-      sortedGroups[date] = groups[date];
-    });
-    
-    return sortedGroups;
-  }, [filteredMealLogs]);
+      
+      console.log('ユーザーID:', auth.currentUser.uid);
+      const mealsRef = collection(db, `users/${auth.currentUser.uid}/mealLogs`);
+      console.log('コレクションパス:', `users/${auth.currentUser.uid}/mealLogs`);
+      
+      try {
+        const querySnapshot = await getDocs(mealsRef);
+        console.log('取得した食事記録の数:', querySnapshot.size);
+        
+        const dates = new Set<string>();
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          console.log('食事記録データ:', data);
+          const dateStr = convertTimestampToDateString(data.date);
+          if (dateStr) {
+            dates.add(dateStr);
+          }
+        });
+        
+        console.log('記録のある日付一覧:', Array.from(dates));
+        setMealDates(dates);
+      } catch (error) {
+        console.error('食事記録の取得中にエラーが発生:', error);
+      }
+    };
 
-  const mealTypes: (MealType | 'all')[] = ['all', '朝食', '昼食', '夕食', '間食'];
+    fetchMealDates();
+  }, [auth.currentUser]);
 
-  // 日付をフォーマット
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+  useEffect(() => {
+    const fetchMealsForDate = async () => {
+      if (!auth.currentUser) {
+        console.log('ユーザーが認証されていません（日付別取得）');
+        return;
+      }
 
-    if (dateString === today.toISOString().split('T')[0]) {
-      return '今日';
-    } else if (dateString === yesterday.toISOString().split('T')[0]) {
-      return '昨日';
-    } else {
-      return date.toLocaleDateString('ja-JP', {
-        month: 'long',
-        day: 'numeric',
-        weekday: 'short'
+      // 選択された日付の開始と終了のタイムスタンプを作成
+      const year = selectedDate.getFullYear();
+      const month = selectedDate.getMonth();
+      const day = selectedDate.getDate();
+      
+      const startOfDay = new Date(year, month, day, 0, 0, 0);
+      const endOfDay = new Date(year, month, day, 23, 59, 59, 999);
+      
+      const startTimestamp = Timestamp.fromDate(startOfDay);
+      const endTimestamp = Timestamp.fromDate(endOfDay);
+
+      console.log('検索範囲:', {
+        start: convertTimestampToDateString(startTimestamp),
+        end: convertTimestampToDateString(endTimestamp)
       });
+      
+      const mealsRef = collection(db, `users/${auth.currentUser.uid}/mealLogs`);
+      const q = query(
+        mealsRef,
+        where('date', '>=', startTimestamp),
+        where('date', '<=', endTimestamp)
+      );
+      
+      try {
+        const querySnapshot = await getDocs(q);
+        console.log('選択日の食事記録数:', querySnapshot.size);
+        
+        const meals: MealData[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          console.log('取得した食事記録:', data);
+          meals.push({
+            id: doc.id,
+            date: convertTimestampToDateString(data.date),
+            mealType: data.mealType,
+            ingredients: data.ingredients || [],
+            notes: data.notes
+          });
+        });
+        
+        console.log('処理後の食事記録:', meals);
+        setSelectedDateMeals(meals);
+      } catch (error) {
+        console.error('日付別食事記録の取得中にエラーが発生:', error);
+      }
+    };
+
+    fetchMealsForDate();
+  }, [selectedDate, auth.currentUser]);
+
+  const handleDateChange = (value: any, event: React.MouseEvent<HTMLButtonElement>) => {
+    if (value instanceof Date) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
+      console.log('日付変更:', `${year}-${month}-${day}`);
+      setSelectedDate(value);
     }
   };
 
-  // 食事タイプのアイコン
-  const getMealIcon = (mealType: MealType) => {
-    const icons = {
-      '朝食': '🌅',
-      '昼食': '☀️',
-      '夕食': '🌙',
-      '間食': '🍪'
-    };
-    return icons[mealType];
+  const tileContent = ({ date }: { date: Date }) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+    if (mealDates.has(dateString)) {
+      return <div className="meal-indicator" />;
+    }
+    return null;
   };
+
+  if (!auth.currentUser) {
+    console.log('未認証状態でのレンダリング');
+    return (
+      <div className="meal-history">
+        <div className="meal-history-container">
+          <header className="meal-history-header">
+            <h2>ログインが必要です</h2>
+            <p>食事履歴を表示するにはログインしてください。</p>
+          </header>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="meal-history">
       <div className="meal-history-container">
         <header className="meal-history-header">
-          <h1>食事記録</h1>
-          <p>これまでの食事履歴を確認</p>
+          <h2>食事履歴</h2>
+          <p>カレンダーで食事記録を確認</p>
         </header>
 
-        {/* フィルター */}
-        <div className="meal-filters">
-          <div className="filter-group">
-            <label>食事タイプ</label>
-            <div className="meal-type-filter">
-              {mealTypes.map((mealType) => (
-                <button
-                  key={mealType}
-                  className={`filter-button ${selectedMealType === mealType ? 'active' : ''}`}
-                  onClick={() => setSelectedMealType(mealType)}
-                >
-                  {mealType === 'all' ? '全て' : mealType}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="filter-group">
-            <label htmlFor="date-filter">日付</label>
-            <input
-              type="date"
-              id="date-filter"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="date-filter"
-            />
-            {selectedDate && (
-              <button
-                onClick={() => setSelectedDate('')}
-                className="clear-date-button"
-              >
-                クリア
-              </button>
-            )}
-          </div>
+        <div className="calendar-container">
+          <Calendar
+            onChange={handleDateChange}
+            value={selectedDate}
+            tileContent={tileContent}
+            locale="ja-JP"
+          />
         </div>
-
-        {/* 食事記録一覧 */}
-        <div className="meal-logs">
-          {Object.keys(groupedLogs).length === 0 ? (
-            <div className="no-logs">
-              <p>食事記録がありません</p>
-              <p>食事入力画面から記録を始めましょう</p>
-            </div>
+        
+        <div className="meal-details">
+          <h3>{selectedDate.toLocaleDateString('ja-JP')}の食事</h3>
+          {selectedDateMeals.length > 0 ? (
+            <ul className="meal-list">
+              {selectedDateMeals.map((meal) => (
+                <li key={meal.id} className="meal-item">
+                  <div>
+                    <strong>{meal.mealType}</strong>
+                    {meal.notes && <span>: {meal.notes}</span>}
+                  </div>
+                  <div>
+                    {meal.ingredients.length > 0 ? 
+                      `使用食材: ${meal.ingredients.length}個` : 
+                      '食材未使用'}
+                  </div>
+                </li>
+              ))}
+            </ul>
           ) : (
-            Object.entries(groupedLogs).map(([date, logs]) => (
-              <div key={date} className="date-group">
-                <h3 className="date-header">
-                  {formatDate(date)} ({date})
-                </h3>
-                
-                <div className="meal-cards">
-                  {logs.map((log) => {
-                    const ingredients = getIngredientDetails(log.ingredients);
-                    
-                    return (
-                      <div key={log.id} className="meal-card">
-                        <div className="meal-card-header">
-                          <h4>
-                            <span className="meal-icon">{getMealIcon(log.mealType)}</span>
-                            {log.mealType}
-                          </h4>
-                          <span className="meal-time">
-                            {new Date(log.createdAt).toLocaleTimeString('ja-JP', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        </div>
-
-                        <div className="meal-content">
-                          {ingredients.length > 0 && (
-                            <div className="ingredients-section">
-                              <h5>使用した食材</h5>
-                              <div className="ingredients-list">
-                                {ingredients.map((ingredient) => (
-                                  <div key={ingredient.id} className="ingredient-item">
-                                    <span className="ingredient-name">
-                                      {ingredient.description}
-                                    </span>
-                                    <span className="ingredient-price">
-                                      ¥{ingredient.amount.toLocaleString()}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {log.notes && (
-                            <div className="notes-section">
-                              <h5>メモ</h5>
-                              <p className="meal-notes">{log.notes}</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))
+            <p>この日の記録はありません</p>
           )}
         </div>
-
-        {/* 統計情報 */}
-        {filteredMealLogs.length > 0 && (
-          <div className="meal-stats">
-            <h3>統計情報</h3>
-            <div className="stats-grid">
-              <div className="stat-item">
-                <span className="stat-number">{filteredMealLogs.length}</span>
-                <span className="stat-label">食事記録</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{Object.keys(groupedLogs).length}</span>
-                <span className="stat-label">記録日数</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">
-                  {filteredMealLogs.reduce((total, log) => total + log.ingredients.length, 0)}
-                </span>
-                <span className="stat-label">使用食材数</span>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

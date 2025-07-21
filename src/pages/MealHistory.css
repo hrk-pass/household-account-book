@@ -19,7 +19,7 @@
   margin-bottom: 30px;
 }
 
-.meal-history .meal-history-header h1 {
+.meal-history-header h2 {
   font-size: 2.5rem;
   color: #4682B4;
   margin-bottom: 10px;
@@ -28,10 +28,142 @@
   text-shadow: 0 1px 3px rgba(135, 206, 250, 0.2);
 }
 
-.meal-history .meal-history-header p {
+.meal-history-header p {
   color: #87CEEB;
   font-size: 1.1rem;
   margin: 0;
+}
+
+.calendar-container {
+  margin: 20px 0;
+  padding: 20px;
+  background: rgba(240, 248, 255, 0.8);
+  border-radius: 15px;
+  border: 1px solid rgba(135, 206, 250, 0.3);
+  box-shadow: 0 4px 12px rgba(135, 206, 250, 0.1);
+}
+
+.react-calendar {
+  width: 100%;
+  background: white;
+  border: 2px solid rgba(135, 206, 250, 0.3);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(135, 206, 250, 0.1);
+  font-family: inherit;
+  line-height: 1.125em;
+  padding: 15px;
+}
+
+.react-calendar__tile {
+  padding: 1em 0.5em;
+  position: relative;
+  color: #4682B4;
+  font-weight: 500;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background: #F0F8FF;
+  border-radius: 8px;
+}
+
+.react-calendar__tile--active {
+  background: #87CEEB !important;
+  color: white !important;
+  border-radius: 8px;
+}
+
+.react-calendar__tile--now {
+  background: #E6F3FF;
+  border-radius: 8px;
+}
+
+.react-calendar__navigation button {
+  color: #4682B4;
+  font-weight: 600;
+  margin: 0 8px;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background: #F0F8FF;
+  border-radius: 8px;
+}
+
+.react-calendar__month-view__weekdays {
+  color: #87CEEB;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8em;
+}
+
+.meal-date {
+  position: relative;
+}
+
+.meal-indicator {
+  width: 6px;
+  height: 6px;
+  background-color: #20B2AA;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.meal-details {
+  margin-top: 20px;
+  padding: 25px;
+  background: rgba(240, 248, 255, 0.8);
+  border-radius: 15px;
+  border: 1px solid rgba(135, 206, 250, 0.3);
+  box-shadow: 0 4px 12px rgba(135, 206, 250, 0.1);
+}
+
+.meal-details h3 {
+  color: #4682B4;
+  margin: 0 0 20px 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(135, 206, 250, 0.3);
+}
+
+.meal-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.meal-item {
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid rgba(135, 206, 250, 0.2);
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.meal-item:hover {
+  background: #F8FBFF;
+  border-color: #87CEEB;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(135, 206, 250, 0.15);
+}
+
+.meal-item strong {
+  color: #4682B4;
+  font-weight: 600;
+}
+
+.meal-item div:last-child {
+  color: #20B2AA;
+  font-weight: 600;
 }
 
 /* フィルター */
@@ -314,45 +446,57 @@
   .meal-history {
     padding: 10px;
   }
-  
+
   .meal-history-container {
     padding: 20px;
   }
-  
-  .meal-history-header h1 {
+
+  .meal-history-header h2 {
     font-size: 2rem;
   }
-  
+
+  .calendar-container {
+    padding: 10px;
+  }
+
+  .react-calendar {
+    padding: 10px;
+  }
+
+  .meal-details {
+    padding: 15px;
+  }
+
   .meal-filters {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .meal-type-filter {
     justify-content: center;
   }
-  
+
   .meal-card-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .meal-time {
     align-self: flex-end;
   }
-  
+
   .ingredient-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
   }
-  
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
   }
-  
+
   .stat-number {
     font-size: 1.5rem;
   }
