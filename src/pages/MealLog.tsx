@@ -97,6 +97,15 @@ const MealLog: React.FC = () => {
                         <div className="consumption-rate">
                           <span className="rate-label">消費率</span>
                           <span className="rate-value">{expense.consumptionRate}%</span>
+                          <div className="consumption-bar">
+                            <div 
+                              className="consumption-fill"
+                              style={{ width: `${expense.consumptionRate}%` }}
+                            />
+                          </div>
+                          {expense.consumptionRate >= 100 && (
+                            <span className="consumed-label">完了</span>
+                          )}
                         </div>
                       )}
                     </div>

@@ -7,6 +7,7 @@ import DailyInput from './pages/DailyInput';
 import WeeklyList from './pages/WeeklyList';
 import MonthlySummaryPage from './pages/MonthlySummary';
 import MealLog from './pages/MealLog';
+import MealPrepInput from './pages/MealPrepInput';
 import MealLogInput from './pages/MealLogInput';
 import MealHistory from './pages/MealHistory';
 import './App.css';
@@ -35,6 +36,7 @@ function AuthenticatedApp() {
             <Route path="/list" element={<WeeklyList />} />
             <Route path="/summary" element={<MonthlySummaryPage />} />
             <Route path="/meal-log" element={<MealLog />} />
+            <Route path="/meal-prep-input" element={<MealPrepInput />} />
             <Route path="/meal-log-input" element={<MealLogInput />} />
             <Route path="/meal-history" element={<MealHistory />} />
           </Routes>

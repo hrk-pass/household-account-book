@@ -1,17 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useExpense } from '../contexts/ExpenseContext';
-import type { MealType, FoodItem } from '../types';
+import type { MealType, FoodItem, MealPrepItem } from '../types';
 import './MealLogInput.css';
 
 const MealLogInput: React.FC = () => {
   const navigate = useNavigate();
-  const { state, updateExpense, addMealLog } = useExpense();
+  const { state, updateExpense, addMealLog, updateMealPrepItem } = useExpense();
   
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
   const [selectedMealType, setSelectedMealType] = useState<MealType>('朝食');
   const [mealNotes, setMealNotes] = useState('');
   const [consumptionUpdates, setConsumptionUpdates] = useState<{ [expenseId: string]: number }>({});
+  const [mealPrepConsumptionUpdates, setMealPrepConsumptionUpdates] = useState<{ [itemId: string]: number }>({});
+  const [selectedMealPrepItems, setSelectedMealPrepItems] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUnused, setIsUnused] = useState(false);
 
@@ -31,6 +33,13 @@ const MealLogInput: React.FC = () => {
       .sort((a, b) => a.description.localeCompare(b.description));
   }, [state.expenses]);
 
+  // 使用可能な作り置きを取得（消費率が100%未満のもの）
+  const availableMealPrepItems = useMemo(() => {
+    return state.mealPrepItems
+      .filter(item => item.consumptionRate < 100)
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }, [state.mealPrepItems]);
+
   const mealTypes: MealType[] = ['朝食', '昼食', '夕食', '間食'];
 
   // 消費率を更新
@@ -41,21 +50,40 @@ const MealLogInput: React.FC = () => {
     }));
   };
 
+  // 作り置きの消費率を更新
+  const handleMealPrepConsumptionChange = (itemId: string, newRate: number) => {
+    setMealPrepConsumptionUpdates(prev => ({
+      ...prev,
+      [itemId]: newRate
+    }));
+  };
+
   // 未使用状態を切り替え
   const handleUnusedToggle = (unused: boolean) => {
     setIsUnused(unused);
     if (unused) {
-      // 未使用を選択した場合、消費率更新をクリア
+      // 未使用を選択した場合、消費率更新と作り置き選択をクリア
       setConsumptionUpdates({});
+      setMealPrepConsumptionUpdates({});
+      setSelectedMealPrepItems([]);
     }
+  };
+
+  // 作り置き選択を切り替え
+  const toggleMealPrepItem = (itemId: string) => {
+    setSelectedMealPrepItems(prev => 
+      prev.includes(itemId)
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
   };
 
   // 食事ログを保存
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isUnused && Object.keys(consumptionUpdates).length === 0) {
-      alert('食材を使用する場合は、少なくとも1つの食材の消費率を更新してください');
+    if (!isUnused && Object.keys(consumptionUpdates).length === 0 && Object.keys(mealPrepConsumptionUpdates).length === 0) {
+      alert('食材を使用する場合は、少なくとも1つの食材の消費率を更新するか、作り置きの消費率を更新してください');
       return;
     }
 
@@ -77,11 +105,29 @@ const MealLogInput: React.FC = () => {
         );
       }
 
+      // 選択された作り置きの消費率を更新
+      if (Object.keys(mealPrepConsumptionUpdates).length > 0) {
+        await Promise.all(
+          Object.entries(mealPrepConsumptionUpdates).map(async ([itemId, additionalRate]) => {
+            const mealPrepItem = state.mealPrepItems.find(item => item.id === itemId);
+            if (mealPrepItem) {
+              const newConsumptionRate = Math.min(100, mealPrepItem.consumptionRate + additionalRate);
+              await updateMealPrepItem({
+                ...mealPrepItem,
+                consumptionRate: newConsumptionRate,
+                isUsed: newConsumptionRate >= 100
+              });
+            }
+          })
+        );
+      }
+
       // 食事ログを保存
       await addMealLog({
         date: selectedDate,
         mealType: selectedMealType,
         ingredients: isUnused ? [] : Object.keys(consumptionUpdates),
+        ...(Object.keys(mealPrepConsumptionUpdates).length > 0 ? { mealPrepItems: Object.keys(mealPrepConsumptionUpdates) } : {}),
         ...(mealNotes ? { notes: mealNotes } : {}),
         createdAt: new Date().toISOString(),
       });
@@ -90,6 +136,8 @@ const MealLogInput: React.FC = () => {
       const statusMessage = isUnused ? '（食材未使用）' : '';
       alert(`${selectedMealType}の記録が完了しました${statusMessage}`);
       setConsumptionUpdates({});
+      setMealPrepConsumptionUpdates({});
+      setSelectedMealPrepItems([]);
       setMealNotes('');
       setIsUnused(false);
 
@@ -166,8 +214,76 @@ const MealLogInput: React.FC = () => {
 
           {/* 食材消費率入力（食材使用時のみ表示） */}
           {!isUnused && (
-            <div className="ingredients-section">
-              <h3>食材の消費率を入力 ({availableFoodItems.length}件)</h3>
+            <>
+              {/* 作り置き選択 */}
+              {availableMealPrepItems.length > 0 && (
+                <div className="meal-prep-section">
+                  <h3>作り置きを使用 ({availableMealPrepItems.length}件)</h3>
+                  <div className="meal-prep-grid">
+                    {availableMealPrepItems.map((item) => {
+                      const currentConsumption = item.consumptionRate;
+                      const additionalConsumption = mealPrepConsumptionUpdates[item.id] || 0;
+                      const totalConsumption = Math.min(100, currentConsumption + additionalConsumption);
+                      
+                      return (
+                        <div key={item.id} className="meal-prep-item">
+                          <div className="meal-prep-info">
+                            <h4>{item.name}</h4>
+                            <p className="meal-prep-meta">
+                              作成日: {item.date} | 現在の消費率: {currentConsumption}%
+                            </p>
+                            {item.notes && (
+                              <p className="meal-prep-notes">{item.notes}</p>
+                            )}
+                            
+                            <div className="consumption-display">
+                              <div className="consumption-bar">
+                                <div 
+                                  className="consumption-fill current"
+                                  style={{ width: `${currentConsumption}%` }}
+                                />
+                                {additionalConsumption > 0 && (
+                                  <div 
+                                    className="consumption-fill additional"
+                                    style={{ 
+                                      width: `${additionalConsumption}%`,
+                                      left: `${currentConsumption}%`
+                                    }}
+                                  />
+                                )}
+                              </div>
+                              <span className="total-consumption">
+                                合計: {totalConsumption}%
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="consumption-input">
+                            <label>今回の使用量</label>
+                            <div className="consumption-buttons">
+                              {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+                                .filter(option => option <= 100 - currentConsumption)
+                                .map((option) => (
+                                <button
+                                  key={option}
+                                  type="button"
+                                  className={`consumption-button ${additionalConsumption === option ? 'active' : ''}`}
+                                  onClick={() => handleMealPrepConsumptionChange(item.id, option)}
+                                >
+                                  +{option}%
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="ingredients-section">
+                <h3>食材の消費率を入力 ({availableFoodItems.length}件)</h3>
               
               {availableFoodItems.length === 0 ? (
                 <div className="no-ingredients">
@@ -235,6 +351,7 @@ const MealLogInput: React.FC = () => {
                 </div>
               )}
             </div>
+            </>
           )}
 
           {/* 未使用時のメッセージ */}
@@ -271,7 +388,7 @@ const MealLogInput: React.FC = () => {
             <button
               type="submit"
               className="submit-button"
-              disabled={isSubmitting || (!isUnused && Object.keys(consumptionUpdates).length === 0)}
+              disabled={isSubmitting || (!isUnused && Object.keys(consumptionUpdates).length === 0 && Object.keys(mealPrepConsumptionUpdates).length === 0)}
             >
               {isSubmitting ? '記録中...' : `${selectedMealType}を記録`}
             </button>
@@ -283,8 +400,9 @@ const MealLogInput: React.FC = () => {
           <h3>◆ 使用方法</h3>
           <ul>
             <li><strong>食材を使用</strong>：家にある食材の消費率を10%単位で記録</li>
+            <li><strong>作り置きを使用</strong>：事前に作成した作り置き料理の消費率を10%単位で記録（消費率が100%になると非表示）</li>
             <li><strong>食材未使用</strong>：外食やお弁当購入時などに選択</li>
-            <li>複数の食材を同時に記録できます</li>
+            <li>複数の食材や作り置きを同時に記録できます</li>
             <li>消費率が100%になった食材は次回から表示されません</li>
             <li>食事タイプごとに記録を分けて管理できます</li>
           </ul>

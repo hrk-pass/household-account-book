@@ -237,6 +237,33 @@ div.meal-log div.meal-log-container div.content div.kitchen-expenses div.expense
   border: 1px solid #FFE0E0;
 }
 
+.consumption-bar {
+  width: 60px;
+  height: 6px;
+  background: #F0F0F0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.consumption-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FF6B6B, #FF8E8E);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.consumed-label {
+  font-size: 0.7rem;
+  color: #20B2AA;
+  font-weight: 600;
+  background: #F0FFFA;
+  padding: 1px 6px;
+  border-radius: 8px;
+  border: 1px solid #E0F5F0;
+  margin-top: 2px;
+}
+
 /* 空の状態 */
 .empty-state {
   text-align: center;

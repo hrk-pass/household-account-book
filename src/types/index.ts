@@ -35,6 +35,7 @@ export interface AppState {
   expenses: Expense[];
   categories: Category[];
   mealLogs: MealLog[];
+  mealPrepItems: MealPrepItem[];
 }
 
 // アクションの型定義
@@ -50,7 +51,11 @@ export type AppAction =
   | { type: 'ADD_MEAL_LOG'; payload: MealLog }
   | { type: 'UPDATE_MEAL_LOG'; payload: MealLog }
   | { type: 'DELETE_MEAL_LOG'; payload: string }
-  | { type: 'SET_MEAL_LOGS'; payload: MealLog[] };
+  | { type: 'SET_MEAL_LOGS'; payload: MealLog[] }
+  | { type: 'ADD_MEAL_PREP_ITEM'; payload: MealPrepItem }
+  | { type: 'UPDATE_MEAL_PREP_ITEM'; payload: MealPrepItem }
+  | { type: 'DELETE_MEAL_PREP_ITEM'; payload: string }
+  | { type: 'SET_MEAL_PREP_ITEMS'; payload: MealPrepItem[] };
 
 // 食事Log機能用の型定義
 export type KitchenSubCategory = '食材' | '調味料' | '消耗品' | 'その他';
@@ -62,6 +67,7 @@ export interface MealLog {
   date: string; // YYYY-MM-DD形式
   mealType: MealType;
   ingredients: string[]; // 使用した食材のExpense ID
+  mealPrepItems?: string[]; // 使用した作り置きのID
   notes?: string;
   createdAt: string;
 }
@@ -70,4 +76,16 @@ export interface FoodItem extends Expense {
   subCategory: KitchenSubCategory;
   consumptionRate: number; // 0-100
   isConsumed: boolean; // 消費率が100%かどうか
+}
+
+// 作り置き機能用の型定義
+export interface MealPrepItem {
+  id: string;
+  name: string;
+  date: string; // YYYY-MM-DD形式（作り置きした日）
+  ingredients: string[]; // 使用した食材のExpense ID
+  consumptionRate: number; // 消費率（0-100）
+  isUsed?: boolean; // 使用済みかどうか
+  notes?: string;
+  createdAt: string;
 } 

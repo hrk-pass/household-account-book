@@ -2,7 +2,7 @@ import { createContext, useContext, useReducer, useEffect, useState } from 'reac
 import { onAuthStateChanged } from 'firebase/auth';
 import type { ReactNode } from 'react';
 import type { User } from 'firebase/auth';
-import type { AppState, AppAction, Expense, Category, MealLog } from '../types';
+import type { AppState, AppAction, Expense, Category, MealLog, MealPrepItem } from '../types';
 import { auth } from '../lib/firebase';
 import { expenseService, categoryService, mealLogService } from '../lib/firestore';
 
@@ -11,6 +11,7 @@ const initialState: AppState = {
   expenses: [],
   categories: [],
   mealLogs: [],
+  mealPrepItems: [],
 };
 
 // Reducer関数
@@ -82,6 +83,28 @@ function expenseReducer(state: AppState, action: AppAction): AppState {
         ...state,
         mealLogs: state.mealLogs.filter(mealLog => mealLog.id !== action.payload),
       };
+    case 'SET_MEAL_PREP_ITEMS':
+      return {
+        ...state,
+        mealPrepItems: action.payload,
+      };
+    case 'ADD_MEAL_PREP_ITEM':
+      return {
+        ...state,
+        mealPrepItems: [...state.mealPrepItems, action.payload],
+      };
+    case 'UPDATE_MEAL_PREP_ITEM':
+      return {
+        ...state,
+        mealPrepItems: state.mealPrepItems.map(item =>
+          item.id === action.payload.id ? action.payload : item
+        ),
+      };
+    case 'DELETE_MEAL_PREP_ITEM':
+      return {
+        ...state,
+        mealPrepItems: state.mealPrepItems.filter(item => item.id !== action.payload),
+      };
     default:
       return state;
   }
@@ -101,6 +124,9 @@ interface ExpenseContextType {
   addMealLog: (mealLog: Omit<MealLog, 'id'>) => Promise<void>;
   updateMealLog: (mealLog: MealLog) => Promise<void>;
   deleteMealLog: (id: string) => Promise<void>;
+  addMealPrepItem: (mealPrepItem: Omit<MealPrepItem, 'id'>) => Promise<void>;
+  updateMealPrepItem: (mealPrepItem: MealPrepItem) => Promise<void>;
+  deleteMealPrepItem: (id: string) => Promise<void>;
 }
 
 // Context作成
@@ -272,6 +298,41 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // 作り置き操作（一時的にダミー実装）
+  const addMealPrepItem = async (mealPrepItem: Omit<MealPrepItem, 'id'>) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      // TODO: mealPrepServiceを実装後に置き換え
+      const newItem = { ...mealPrepItem, id: Date.now().toString() };
+      dispatch({ type: 'ADD_MEAL_PREP_ITEM', payload: newItem });
+    } catch (error) {
+      console.error('作り置き追加エラー:', error);
+      throw error;
+    }
+  };
+
+  const updateMealPrepItem = async (mealPrepItem: MealPrepItem) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      // TODO: mealPrepServiceを実装後に置き換え
+      dispatch({ type: 'UPDATE_MEAL_PREP_ITEM', payload: mealPrepItem });
+    } catch (error) {
+      console.error('作り置き更新エラー:', error);
+      throw error;
+    }
+  };
+
+  const deleteMealPrepItem = async (id: string) => {
+    if (!user) throw new Error('ユーザーがログインしていません');
+    try {
+      // TODO: mealPrepServiceを実装後に置き換え
+      dispatch({ type: 'DELETE_MEAL_PREP_ITEM', payload: id });
+    } catch (error) {
+      console.error('作り置き削除エラー:', error);
+      throw error;
+    }
+  };
+
   const value: ExpenseContextType = {
     state,
     user,
@@ -285,6 +346,9 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     addMealLog,
     updateMealLog,
     deleteMealLog,
+    addMealPrepItem,
+    updateMealPrepItem,
+    deleteMealPrepItem,
   };
 
   return (

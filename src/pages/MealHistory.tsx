@@ -11,6 +11,7 @@ type MealData = {
   date: string;
   mealType: string;
   ingredients: string[];
+  mealPrepItems?: string[];
   notes?: string;
 };
 
@@ -108,6 +109,7 @@ const MealHistory = () => {
             date: convertTimestampToDateString(data.date),
             mealType: data.mealType,
             ingredients: data.ingredients || [],
+            mealPrepItems: data.mealPrepItems || [],
             notes: data.notes
           });
         });
@@ -185,9 +187,11 @@ const MealHistory = () => {
                     {meal.notes && <span>: {meal.notes}</span>}
                   </div>
                   <div>
-                    {meal.ingredients.length > 0 ? 
-                      `使用食材: ${meal.ingredients.length}個` : 
-                      '食材未使用'}
+                    {meal.mealPrepItems && meal.mealPrepItems.length > 0 ? 
+                      `使用作り置き: ${meal.mealPrepItems.length}個` : 
+                      meal.ingredients.length > 0 ? 
+                        `使用食材: ${meal.ingredients.length}個` : 
+                        '食材未使用'}
                   </div>
                 </li>
               ))}
