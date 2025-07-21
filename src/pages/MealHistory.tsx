@@ -6,8 +6,6 @@ import { db } from '../lib/firebase';
 import { getAuth } from 'firebase/auth';
 import './MealHistory.css';
 
-import type { MealLog } from '../types';
-
 type MealData = {
   id: string;
   date: string;
@@ -124,7 +122,7 @@ const MealHistory = () => {
     fetchMealsForDate();
   }, [selectedDate, auth.currentUser]);
 
-  const handleDateChange = (value: any, event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDateChange = (value: any) => {
     if (value instanceof Date) {
       const year = value.getFullYear();
       const month = String(value.getMonth() + 1).padStart(2, '0');
