@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useExpense } from '../contexts/ExpenseContext';
-import type { MealType, FoodItem, MealPrepItem } from '../types';
+import type { MealType, FoodItem } from '../types';
 import './MealLogInput.css';
 
 const MealLogInput: React.FC = () => {
@@ -13,7 +13,6 @@ const MealLogInput: React.FC = () => {
   const [mealNotes, setMealNotes] = useState('');
   const [consumptionUpdates, setConsumptionUpdates] = useState<{ [expenseId: string]: number }>({});
   const [mealPrepConsumptionUpdates, setMealPrepConsumptionUpdates] = useState<{ [itemId: string]: number }>({});
-  const [selectedMealPrepItems, setSelectedMealPrepItems] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUnused, setIsUnused] = useState(false);
 
@@ -62,20 +61,10 @@ const MealLogInput: React.FC = () => {
   const handleUnusedToggle = (unused: boolean) => {
     setIsUnused(unused);
     if (unused) {
-      // 未使用を選択した場合、消費率更新と作り置き選択をクリア
+      // 未使用を選択した場合、消費率更新をクリア
       setConsumptionUpdates({});
       setMealPrepConsumptionUpdates({});
-      setSelectedMealPrepItems([]);
     }
-  };
-
-  // 作り置き選択を切り替え
-  const toggleMealPrepItem = (itemId: string) => {
-    setSelectedMealPrepItems(prev => 
-      prev.includes(itemId)
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
-    );
   };
 
   // 食事ログを保存
@@ -137,7 +126,6 @@ const MealLogInput: React.FC = () => {
       alert(`${selectedMealType}の記録が完了しました${statusMessage}`);
       setConsumptionUpdates({});
       setMealPrepConsumptionUpdates({});
-      setSelectedMealPrepItems([]);
       setMealNotes('');
       setIsUnused(false);
 
