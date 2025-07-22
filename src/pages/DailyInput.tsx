@@ -1,18 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useExpense } from '../contexts/ExpenseContext';
 import './DailyInput.css';
+
+interface ExpenseItem {
+  id: string;
+  amount: string;
+  description: string;
+}
 
 const DailyInput: React.FC = () => {
   const navigate = useNavigate();
   const { state, addExpense } = useExpense();
   
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().slice(0, 10), // 今日の日付をデフォルト
-    amount: '',
-    description: '',
-    category: '',
+    date: new Date().toISOString().slice(0, 10),
+    storeName: '',
   });
+  
+  const [items, setItems] = useState<ExpenseItem[]>([
+    { id: '1', amount: '', description: '' }
+  ]);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -25,170 +33,244 @@ const DailyInput: React.FC = () => {
     }));
   };
 
+  const handleItemChange = (id: string, field: 'amount' | 'description', value: string) => {
+    setItems(prevItems => {
+      const newItems = prevItems.map(item =>
+        item.id === id ? { ...item, [field]: value } : item
+      );
+      
+      // 最後の行が入力されていて、かつその行が最後の行の場合、新しい行を追加
+      const lastItem = newItems[newItems.length - 1];
+      if (lastItem.id === id && (lastItem.amount || lastItem.description)) {
+        const newId = (parseInt(lastItem.id) + 1).toString();
+        newItems.push({ id: newId, amount: '', description: '' });
+      }
+      
+      return newItems;
+    });
+  };
+
+  const removeItem = (id: string) => {
+    setItems(prevItems => {
+      const newItems = prevItems.filter(item => item.id !== id);
+      // 最低1行は残す
+      if (newItems.length === 0) {
+        return [{ id: '1', amount: '', description: '' }];
+      }
+      return newItems;
+    });
+  };
+
+  const addItem = () => {
+    const newId = (Math.max(...items.map(item => parseInt(item.id))) + 1).toString();
+    setItems(prev => [...prev, { id: newId, amount: '', description: '' }]);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.amount || !formData.description.trim()) {
-      alert('金額と支出内容は必須です');
+    if (!formData.storeName.trim()) {
+      alert('店舗名は必須です');
       return;
     }
 
-    const amount = parseFloat(formData.amount);
-    if (isNaN(amount) || amount <= 0) {
-      alert('正しい金額を入力してください');
+    const validItems = items.filter(item => 
+      item.amount.trim() && item.description.trim()
+    );
+
+    if (validItems.length === 0) {
+      alert('少なくとも1つの明細を入力してください');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const expenseData: any = {
-        date: formData.date,
-        amount: amount,
-        description: formData.description.trim(),
-        createdAt: new Date().toISOString(),
-      };
+      for (const item of validItems) {
+        const amount = parseFloat(item.amount.replace(/,/g, ''));
+        
+        if (isNaN(amount) || amount <= 0) {
+          alert(`明細「${item.description}」の金額が正しくありません`);
+          setIsSubmitting(false);
+          return;
+        }
 
-      // カテゴリーが選択されている場合は追加
-      if (formData.category) {
-        expenseData.category = formData.category;
+        const expenseData: any = {
+          date: formData.date,
+          amount: amount,
+          description: item.description.trim(),
+          storeName: formData.storeName.trim(),
+          createdAt: new Date().toISOString(),
+        };
+
+        await addExpense(expenseData);
       }
 
-      await addExpense(expenseData);
-
-      // 成功メッセージを表示
       setShowSuccess(true);
       
-      // フォームをリセット
       setFormData({
         date: new Date().toISOString().slice(0, 10),
-        amount: '',
-        description: '',
-        category: '',
+        storeName: '',
       });
 
-      // 2秒後に成功メッセージを非表示
+      // 明細をクリア
+      setItems([{ id: '1', amount: '', description: '' }]);
+
       setTimeout(() => {
         setShowSuccess(false);
       }, 2000);
 
     } catch (error) {
-      console.error('Error adding expense:', error);
+      console.error('Error adding expenses:', error);
       alert('支出の登録に失敗しました');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const quickAmounts = [100, 300, 500, 1000, 2000, 3000];
-  const quickDescriptions = [
-    '昼食', '夕食', 'コーヒー', '電車代', 'バス代', 
-    'コンビニ', 'スーパー', 'ガソリン', '駐車場', '本・雑誌'
-  ];
+  const getTotalAmount = () => {
+    return items.reduce((total, item) => {
+      if (!item.amount.trim()) return total;
+      const amount = parseFloat(item.amount.replace(/,/g, ''));
+      return total + (isNaN(amount) ? 0 : amount);
+    }, 0);
+  };
+
+  const getValidRowCount = () => {
+    return items.filter(item => 
+      item.amount.trim() && item.description.trim()
+    ).length;
+  };
+
+  const formatNumber = (value: string) => {
+    const num = parseFloat(value.replace(/,/g, ''));
+    return isNaN(num) ? value : num.toLocaleString('ja-JP');
+  };
 
   return (
     <div className="daily-input">
       <div className="daily-input-container">
         <header className="daily-input-header">
           <h1>支出入力</h1>
-          <p>効率的な家計管理のための支出記録</p>
+          <p>効率的に複数明細を入力</p>
         </header>
 
         {showSuccess && (
           <div className="success-message">
-            ◆ 支出が正常に記録されました
+            ◆ {getValidRowCount()}件の支出が正常に記録されました
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="expense-form">
-          <div className="form-group">
-            <label htmlFor="date">日付</label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-              className="form-input"
-            />
-          </div>
+          <div className="form-header">
+            <div className="form-group">
+              <label htmlFor="date">日付</label>
+              <input
+                type="date"
+                id="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                required
+                className="form-input"
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="amount">金額 (円)</label>
-            <input
-              type="number"
-              id="amount"
-              name="amount"
-              value={formData.amount}
-              onChange={handleChange}
-              placeholder="1000"
-              min="1"
-              step="1"
-              required
-              className="form-input"
-            />
-            <div className="quick-amounts">
-              <span className="quick-label">クイック入力:</span>
-              {quickAmounts.map((amount) => (
-                <button
-                  key={amount}
-                  type="button"
-                  className="quick-button"
-                  onClick={() => setFormData(prev => ({ ...prev, amount: amount.toString() }))}
-                >
-                  ¥{amount.toLocaleString()}
-                </button>
-              ))}
+            <div className="form-group">
+              <label htmlFor="storeName">店舗名</label>
+              <input
+                type="text"
+                id="storeName"
+                name="storeName"
+                value={formData.storeName}
+                onChange={handleChange}
+                placeholder="店舗名を入力してください"
+                required
+                className="form-input"
+              />
             </div>
           </div>
 
-          {/* カテゴリー選択 */}
-          <div className="form-group">
-            <label htmlFor="category">カテゴリー（任意）</label>
-            <select
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="form-input"
-            >
-              <option value="">カテゴリーを選択...</option>
-              {state.categories.map((category) => (
-                <option key={category.id} value={category.name}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="spreadsheet-section">
+            <div className="section-header">
+              <h3>明細一覧</h3>
+              <div className="spreadsheet-actions">
+                <button
+                  type="button"
+                  onClick={addItem}
+                  className="add-row-button"
+                >
+                  行を追加
+                </button>
+              </div>
+            </div>
 
+            <div className="spreadsheet-container">
+              <table className="expense-table">
+                <thead>
+                  <tr>
+                    <th className="row-header">#</th>
+                    <th className="amount-header">金額 (円)</th>
+                    <th className="description-header">支出内容</th>
+                    <th className="action-header">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item, index) => (
+                    <tr key={item.id} className="expense-row">
+                      <td className="row-number">{index + 1}</td>
+                      <td className="amount-cell">
+                        <input
+                          type="text"
+                          value={item.amount}
+                          onChange={(e) => {
+                            let value = e.target.value;
+                            // 数字、コンマ、ピリオドのみ許可
+                            value = value.replace(/[^\d,.-]/g, '');
+                            handleItemChange(item.id, 'amount', value);
+                          }}
+                          onBlur={(e) => {
+                            // フォーカスを失った時に数値フォーマット
+                            const formatted = formatNumber(e.target.value);
+                            handleItemChange(item.id, 'amount', formatted);
+                          }}
+                          placeholder="金額を入力"
+                          className="cell-input"
+                        />
+                      </td>
+                      <td className="description-cell">
+                        <input
+                          type="text"
+                          value={item.description}
+                          onChange={(e) => handleItemChange(item.id, 'description', e.target.value)}
+                          placeholder="支出内容を入力"
+                          className="cell-input"
+                        />
+                      </td>
+                      <td className="action-cell">
+                        {items.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.id)}
+                            className="remove-row-button"
+                            title="この行を削除"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-
-          <div className="form-group">
-            <label htmlFor="description">支出内容</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="支出の詳細を入力してください"
-              required
-              className="form-textarea"
-              rows={3}
-            />
-            <div className="quick-descriptions">
-              <span className="quick-label">よく使う項目:</span>
-              <div className="quick-tags">
-                {quickDescriptions.map((desc) => (
-                  <button
-                    key={desc}
-                    type="button"
-                    className="quick-tag"
-                    onClick={() => setFormData(prev => ({ ...prev, description: desc }))}
-                  >
-                    {desc}
-                  </button>
-                ))}
+            <div className="total-section">
+              <div className="total-amount">
+                合計金額: <span className="total-value">¥{getTotalAmount().toLocaleString()}</span>
+                <span className="total-count">
+                  ({getValidRowCount()}件)
+                </span>
               </div>
             </div>
           </div>
@@ -205,9 +287,9 @@ const DailyInput: React.FC = () => {
             <button
               type="submit"
               className="submit-button"
-              disabled={isSubmitting || !formData.amount || !formData.description.trim()}
+              disabled={isSubmitting || !formData.storeName.trim() || getValidRowCount() === 0}
             >
-              {isSubmitting ? '記録中...' : '支出を記録'}
+              {isSubmitting ? '記録中...' : `${getValidRowCount()}件を一括記録`}
             </button>
           </div>
         </form>
@@ -215,9 +297,11 @@ const DailyInput: React.FC = () => {
         <div className="form-tips">
           <h3>◆ 操作ガイド</h3>
           <ul>
-            <li>金額のクイック入力ボタンで効率的に入力できます</li>
-            <li>よく使う項目タグをクリックして内容を自動入力</li>
-            <li>記録後は週次画面でカテゴリーを設定できます</li>
+            <li><strong>Tab/Enter</strong>: 次のフィールドに移動</li>
+            <li><strong>行を追加ボタン</strong>: 新しい明細行を追加</li>
+            <li><strong>×ボタン</strong>: 該当行を削除</li>
+            <li><strong>自動追加</strong>: 最後の行に入力すると自動的に新しい行が追加されます</li>
+            <li><strong>数値フォーマット</strong>: 金額欄はフォーカスを外すと自動的にカンマ区切りになります</li>
           </ul>
         </div>
       </div>

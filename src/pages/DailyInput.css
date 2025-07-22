@@ -140,7 +140,8 @@
   color: #c9a96e;
 }
 
-.quick-descriptions {
+.quick-descriptions,
+.quick-store-names {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid #404040;
@@ -278,39 +279,422 @@
   line-height: 1.5;
 }
 
-.form-help {
-  display: block;
-  margin-top: 0.5rem;
-  color: #999;
-  font-size: 0.85rem;
-  line-height: 1.4;
-  font-style: italic;
+/* 一括入力機能のスタイル */
+.expense-items-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #404040;
 }
 
+/* スプレッドシート形式のスタイル */
+.form-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.spreadsheet-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #404040;
+}
+
+.spreadsheet-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.add-row-button {
+  background: rgba(201, 169, 110, 0.2);
+  border: 1px solid rgba(201, 169, 110, 0.4);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: #c9a96e;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.add-row-button:hover {
+  background: rgba(201, 169, 110, 0.3);
+  border-color: rgba(201, 169, 110, 0.6);
+  transform: translateY(-1px);
+}
+
+.keyboard-shortcuts {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.shortcut-hint {
+  background: rgba(60, 60, 60, 0.5);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #404040;
+}
+
+.spreadsheet-container {
+  background: rgba(45, 45, 45, 0.9);
+  border: 1px solid #404040;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.expense-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(60, 60, 60, 0.8);
+}
+
+.expense-table th {
+  background: rgba(201, 169, 110, 0.2);
+  color: #c9a96e;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 2px solid #404040;
+  font-size: 0.9rem;
+}
+
+.expense-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #404040;
+  vertical-align: top;
+}
+
+.expense-row:hover {
+  background: rgba(201, 169, 110, 0.05);
+}
+
+.row-header {
+  width: 50px;
+  text-align: center;
+}
+
+.amount-header {
+  width: 200px;
+}
+
+.description-header {
+  min-width: 300px;
+}
+
+.action-header {
+  width: 80px;
+  text-align: center;
+}
+
+.row-number {
+  text-align: center;
+  color: #999;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.amount-cell,
+.description-cell {
+  position: relative;
+}
+
+.cell-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: rgba(60, 60, 60, 0.8);
+  color: #e8e8e8;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.cell-input:focus {
+  outline: none;
+  border-color: #c9a96e;
+  background: rgba(60, 60, 60, 1);
+  box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.2);
+}
+
+.cell-input::placeholder {
+  color: #666;
+}
+
+.action-cell {
+  text-align: center;
+}
+
+.remove-row-button {
+  background: rgba(220, 53, 69, 0.2);
+  border: 1px solid rgba(220, 53, 69, 0.4);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #dc3545;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.remove-row-button:hover {
+  background: rgba(220, 53, 69, 0.3);
+  border-color: rgba(220, 53, 69, 0.6);
+  transform: scale(1.1);
+}
+
+.total-section {
+  background: rgba(201, 169, 110, 0.1);
+  border: 1px solid rgba(201, 169, 110, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.total-amount {
+  font-size: 1.2rem;
+  color: #e8e8e8;
+  font-weight: 600;
+}
+
+.total-value {
+  color: #c9a96e;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-left: 0.5rem;
+}
+
+.total-count {
+  color: #999;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+
+/* フォーカスされたセルのハイライト */
+.expense-row.focused {
+  background: rgba(201, 169, 110, 0.1);
+}
+
+.cell-input.focused {
+  border-color: #c9a96e;
+  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.3);
+}
+
+/* セル選択のスタイル */
+.amount-cell.selected,
+.description-cell.selected {
+  background: rgba(201, 169, 110, 0.2);
+  border: 2px solid #c9a96e;
+  position: relative;
+}
+
+.amount-cell.selected::after,
+.description-cell.selected::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(201, 169, 110, 0.1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.amount-cell.selected .cell-input,
+.description-cell.selected .cell-input {
+  background: rgba(60, 60, 60, 1);
+  border-color: #c9a96e;
+  position: relative;
+  z-index: 2;
+}
+
+/* 選択範囲の境界線 */
+.expense-table {
+  position: relative;
+}
+
+.expense-table::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* スプレッドシートのホバー効果 */
+.expense-row:hover .amount-cell:not(.selected),
+.expense-row:hover .description-cell:not(.selected) {
+  background: rgba(201, 169, 110, 0.05);
+}
+
+
+
+/* 改良されたテーブルスタイル */
+.expense-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(60, 60, 60, 0.8);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.expense-table th {
+  background: rgba(201, 169, 110, 0.2);
+  color: #c9a96e;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 2px solid #404040;
+  font-size: 0.9rem;
+}
+
+.expense-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #404040;
+  vertical-align: middle;
+}
+
+.expense-row:hover {
+  background: rgba(201, 169, 110, 0.05);
+}
+
+.row-header {
+  width: 50px;
+  text-align: center;
+}
+
+.amount-header {
+  width: 200px;
+}
+
+.description-header {
+  min-width: 300px;
+}
+
+.action-header {
+  width: 80px;
+  text-align: center;
+}
+
+.row-number {
+  text-align: center;
+  color: #999;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.amount-cell input,
+.description-cell input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: rgba(60, 60, 60, 0.8);
+  color: #e8e8e8;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.amount-cell input {
+  text-align: right;
+}
+
+.cell-input:focus {
+  outline: none;
+  border-color: #c9a96e;
+  background: rgba(60, 60, 60, 1);
+  box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.2);
+}
+
+.cell-input::placeholder {
+  color: #666;
+}
+
+/* スプレッドシートコンテナ */
+.spreadsheet-container {
+  background: rgba(45, 45, 45, 0.9);
+  border: 1px solid #404040;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.spreadsheet-container:focus-within {
+  border-color: rgba(201, 169, 110, 0.3);
+}
+
+/* アクションセル */
+.action-cell {
+  text-align: center;
+}
+
+/* キーボードショートカットの改善 */
+.keyboard-shortcuts {
+  font-size: 0.8rem;
+  color: #999;
+  display: flex;
+  align-items: center;
+}
+
+.shortcut-hint {
+  background: rgba(60, 60, 60, 0.5);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #404040;
+  font-family: 'Courier New', monospace;
+}
+
+/* モバイル対応 */
 @media (max-width: 768px) {
-  .daily-input {
-    padding: 1rem 0;
+  .form-header {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
-  .daily-input-header h1 {
-    font-size: 2rem;
-  }
-  
-  .expense-form {
-    padding: 1.5rem;
-  }
-  
-  .form-actions {
+  .spreadsheet-actions {
     flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
   }
   
-  .cancel-button,
-  .daily-input .submit-button {
+  .add-row-button {
     width: 100%;
-    justify-content: center;
   }
   
-  .quick-tags {
-    justify-content: center;
+  .expense-table {
+    font-size: 0.8rem;
+  }
+  
+  .expense-table th,
+  .expense-table td {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .amount-header {
+    width: 120px;
+  }
+  
+  .description-header {
+    min-width: 150px;
+  }
+  
+  .action-header {
+    width: 50px;
+  }
+  
+  .shortcut-hint {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
   }
 } 

@@ -4,6 +4,7 @@ export interface Expense {
   date: string; // YYYY-MM-DD形式
   amount: number;
   description: string;
+  storeName?: string; // 店舗名
   category?: string;
   subCategory?: string; // サブカテゴリー（食事Log機能用）
   consumptionRate?: number; // 消費率（0-100、食材の場合）
