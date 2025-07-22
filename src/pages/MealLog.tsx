@@ -7,10 +7,42 @@ const MealLog: React.FC = () => {
 
   // カテゴリー「kitchen」の明細をフィルタリング（日付順）
   const kitchenExpenses = useMemo(() => {
-    return state.expenses
-      .filter(expense => expense.category === 'kitchen')
+    const filtered = state.expenses
+      .filter(expense => {
+        if (!expense.category) return false;
+        const category = state.categories.find(c => c.id === expense.category);
+        return category?.name === 'kitchen';
+      })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [state.expenses]);
+    
+    // デバッグ情報
+    console.log('MealLog - 全明細:', state.expenses.length);
+    console.log('MealLog - kitchen明細:', filtered.length);
+    console.log('MealLog - kitchen明細詳細:', filtered.map(expense => ({
+      id: expense.id,
+      description: expense.description,
+      category: expense.category,
+      categoryName: state.categories.find(c => c.id === expense.category)?.name,
+      subCategory: expense.subCategory,
+      consumptionRate: expense.consumptionRate
+    })));
+    
+    // カテゴリーIDでのフィルタリング結果も確認
+    const categoryIdFiltered = state.expenses.filter(expense => 
+      expense.category === 'kitchen'
+    );
+    console.log('MealLog - カテゴリーIDでフィルタリング:', categoryIdFiltered.length);
+    console.log('MealLog - カテゴリーIDでフィルタリング詳細:', categoryIdFiltered.map(expense => ({
+      id: expense.id,
+      description: expense.description,
+      category: expense.category,
+      categoryName: state.categories.find(c => c.id === expense.category)?.name,
+      subCategory: expense.subCategory,
+      consumptionRate: expense.consumptionRate
+    })));
+    
+    return filtered;
+  }, [state.expenses, state.categories]);
 
   // サブカテゴリーの選択肢
   const subCategoryOptions = ['食材', '調味料', '消耗品', 'その他'];
@@ -20,8 +52,24 @@ const MealLog: React.FC = () => {
     const expense = state.expenses.find(e => e.id === expenseId);
     if (expense) {
       try {
-        await updateExpense({ ...expense, subCategory: subCategory || undefined });
+        // 空文字列の場合はundefinedを設定
+        const updatedSubCategory = subCategory === '' ? undefined : subCategory;
+        await updateExpense({ ...expense, subCategory: updatedSubCategory });
+        console.log(`サブカテゴリー更新: ${expense.description} → ${updatedSubCategory}`);
+        
+        // 強制的にstateを更新（リアルタイム更新の遅延対策）
+        setTimeout(() => {
+          console.log('強制更新後のstate確認');
+          console.log('MealLog - 現在のkitchen明細:', kitchenExpenses.length, '件');
+          console.log('MealLog - 現在のkitchen明細詳細:', kitchenExpenses.map(expense => ({
+            id: expense.id,
+            description: expense.description,
+            subCategory: expense.subCategory,
+            consumptionRate: expense.consumptionRate
+          })));
+        }, 2000);
       } catch (error) {
+        console.error('サブカテゴリー更新エラー:', error);
         alert('サブカテゴリー更新に失敗しました');
       }
     }

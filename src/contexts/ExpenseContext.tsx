@@ -175,6 +175,17 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     try {
       // 支出をリアルタイム監視
       unsubscribeExpenses = expenseService.subscribeToExpenses(user.uid, (expenses) => {
+        console.log('ExpenseContext - リアルタイム更新受信:', expenses.length, '件');
+        const kitchenExpenses = expenses.filter(expense => {
+          const category = expense.category;
+          return category === 'kitchen';
+        });
+        console.log('ExpenseContext - kitchen明細:', kitchenExpenses.length, '件');
+        console.log('ExpenseContext - kitchen明細詳細:', kitchenExpenses.map(expense => ({
+          id: expense.id,
+          description: expense.description,
+          subCategory: expense.subCategory
+        })));
         dispatch({ type: 'SET_EXPENSES', payload: expenses });
       });
 

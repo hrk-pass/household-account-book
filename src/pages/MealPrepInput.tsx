@@ -8,6 +8,17 @@ const MealPrepInput: React.FC = () => {
   const navigate = useNavigate();
   const { state, addMealPrepItem, updateExpense } = useExpense();
   
+  // コンポーネントマウント時のデバッグ
+  React.useEffect(() => {
+    console.log('MealPrepInput - コンポーネントマウント');
+    console.log('MealPrepInput - 初期state.expenses:', state.expenses.length, '件');
+  }, []);
+  
+  // state.expensesの変更を監視
+  React.useEffect(() => {
+    console.log('MealPrepInput - state.expenses変更検知:', state.expenses.length, '件');
+  }, [state.expenses]);
+  
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
   const [mealPrepName, setMealPrepName] = useState('');
   const [notes, setNotes] = useState('');
@@ -16,18 +27,53 @@ const MealPrepInput: React.FC = () => {
 
   // 使用可能な食材を取得（消費率が100%未満の食材）
   const availableFoodItems = useMemo(() => {
-    return state.expenses
-      .filter(expense => 
-        expense.category === 'kitchen' && 
-        expense.subCategory === '食材' &&
-        (expense.consumptionRate ?? 0) < 100
-      )
+    console.log('MealPrepInput - useMemo実行開始');
+    console.log('MealPrepInput - state.expenses:', state.expenses.length, '件');
+    
+    const kitchenExpenses = state.expenses.filter(expense => {
+      if (!expense.category) return false;
+      const category = state.categories.find(c => c.id === expense.category);
+      return category?.name === 'kitchen' && (expense.consumptionRate ?? 0) < 100;
+    });
+    
+    const foodItems = kitchenExpenses
+      .filter(expense => expense.subCategory === '食材')
       .map(expense => ({
         ...expense,
         consumptionRate: expense.consumptionRate ?? 0,
         isConsumed: (expense.consumptionRate ?? 0) >= 100
       } as FoodItem))
       .sort((a, b) => a.description.localeCompare(b.description));
+    
+    // デバッグ情報
+    console.log('MealPrepInput - 全kitchen明細:', kitchenExpenses.length);
+    console.log('MealPrepInput - 全kitchen明細詳細:', kitchenExpenses.map(item => ({
+      id: item.id,
+      description: item.description,
+      category: item.category,
+      categoryName: state.categories.find(c => c.id === item.category)?.name,
+      subCategory: item.subCategory,
+      consumptionRate: item.consumptionRate
+    })));
+    console.log('MealPrepInput - 食材サブカテゴリー明細:', foodItems.length);
+    console.log('MealPrepInput - 食材明細詳細:', foodItems.map(item => ({
+      id: item.id,
+      description: item.description,
+      subCategory: item.subCategory,
+      consumptionRate: item.consumptionRate
+    })));
+    
+    // 全明細の詳細も確認
+    console.log('MealPrepInput - 全明細詳細:', state.expenses.map(item => ({
+      id: item.id,
+      description: item.description,
+      category: item.category,
+      categoryName: state.categories.find(c => c.id === item.category)?.name,
+      subCategory: item.subCategory,
+      consumptionRate: item.consumptionRate
+    })));
+    
+    return foodItems;
   }, [state.expenses]);
 
   // 消費率を更新
@@ -133,7 +179,52 @@ const MealPrepInput: React.FC = () => {
 
           {/* 食材消費率入力 */}
           <div className="ingredients-section">
-            <h3>食材の消費率を入力 ({availableFoodItems.length}件)</h3>
+            <div className="section-header">
+              <h3>食材の消費率を入力 ({availableFoodItems.length}件)</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('MealPrepInput - 強制更新ボタンクリック');
+                  console.log('MealPrepInput - 現在のstate.expenses:', state.expenses.length, '件');
+                  
+                  // 全明細の詳細を確認
+                  const allExpenses = state.expenses.map(item => ({
+                    id: item.id,
+                    description: item.description,
+                    category: item.category,
+                    subCategory: item.subCategory,
+                    consumptionRate: item.consumptionRate
+                  }));
+                  console.log('MealPrepInput - 全明細詳細:', allExpenses);
+                  
+                  // kitchen明細のみを確認（カテゴリー名でフィルタリング）
+                  const kitchenExpenses = state.expenses.filter(expense => {
+                    if (!expense.category) return false;
+                    const category = state.categories.find(c => c.id === expense.category);
+                    return category?.name === 'kitchen';
+                  });
+                  console.log('MealPrepInput - kitchen明細詳細:', kitchenExpenses.map(item => ({
+                    id: item.id,
+                    description: item.description,
+                    category: item.category,
+                    categoryName: state.categories.find(c => c.id === item.category)?.name,
+                    subCategory: item.subCategory,
+                    consumptionRate: item.consumptionRate
+                  })));
+                }}
+                className="refresh-button"
+                style={{ 
+                  padding: '4px 8px', 
+                  fontSize: '12px', 
+                  backgroundColor: '#f0f0f0', 
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                データ更新確認
+              </button>
+            </div>
             
             {availableFoodItems.length === 0 ? (
               <div className="no-ingredients">

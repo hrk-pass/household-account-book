@@ -42,7 +42,34 @@ export const expenseService = {
       const updatesWithTimestamp = updates.date 
         ? { ...updates, date: Timestamp.fromDate(new Date(updates.date)) }
         : updates;
+      
+      console.log('Firestore updateExpense - 更新対象ID:', expenseId);
+      console.log('Firestore updateExpense - 更新内容:', updatesWithTimestamp);
+      console.log('Firestore updateExpense - 更新前のドキュメントパス:', expenseDoc.path);
+      
       await updateDoc(expenseDoc, updatesWithTimestamp);
+      console.log('Firestore updateExpense - 更新完了:', expenseId);
+      
+      // 更新後の確認（オプション）
+      setTimeout(async () => {
+        try {
+          const updatedDoc = await getDocs(query(
+            getUserCollection(userId, 'expenses'),
+            orderBy('date', 'desc')
+          ));
+          const updatedExpense = updatedDoc.docs.find(doc => doc.id === expenseId);
+          if (updatedExpense) {
+            const data = updatedExpense.data();
+            console.log('Firestore updateExpense - 更新後の確認:', {
+              id: expenseId,
+              subCategory: data.subCategory,
+              description: data.description
+            });
+          }
+        } catch (error) {
+          console.error('Firestore updateExpense - 更新後確認エラー:', error);
+        }
+      }, 2000);
     } catch (error) {
       console.error('支出更新エラー:', error);
       throw error;
@@ -90,6 +117,8 @@ export const expenseService = {
     );
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      console.log('Firestore リアルタイム監視 - スナップショット受信:', querySnapshot.docs.length, '件');
+      
       const expenses = querySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -98,6 +127,34 @@ export const expenseService = {
           date: data.date.toDate().toISOString().split('T')[0]
         } as Expense;
       });
+      
+      // デバッグ情報
+      const kitchenExpenses = expenses.filter(expense => {
+        const category = expense.category;
+        return category === 'kitchen';
+      });
+      console.log('Firestore リアルタイム監視 - 全明細:', expenses.length);
+      console.log('Firestore リアルタイム監視 - kitchen明細:', kitchenExpenses.length);
+      console.log('Firestore リアルタイム監視 - kitchen明細詳細:', kitchenExpenses.map(expense => ({
+        id: expense.id,
+        description: expense.description,
+        subCategory: expense.subCategory,
+        consumptionRate: expense.consumptionRate
+      })));
+      
+      // 更新された明細を特定
+      const updatedExpenses = expenses.filter(expense => 
+        expense.subCategory === '食材' && 
+        kitchenExpenses.some(kitchen => kitchen.id === expense.id)
+      );
+      console.log('Firestore リアルタイム監視 - 食材サブカテゴリー明細:', updatedExpenses.length);
+      console.log('Firestore リアルタイム監視 - 食材明細詳細:', updatedExpenses.map(expense => ({
+        id: expense.id,
+        description: expense.description,
+        subCategory: expense.subCategory,
+        consumptionRate: expense.consumptionRate
+      })));
+      
       callback(expenses);
     }, (error) => {
       console.error('支出監視エラー:', error);
