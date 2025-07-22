@@ -500,4 +500,135 @@
   .stat-number {
     font-size: 1.5rem;
   }
+}
+
+/* 削除機能のスタイル */
+.meal-content {
+  flex: 1;
+}
+
+.meal-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  background: rgba(255, 107, 107, 0.1);
+  transform: scale(1.1);
+}
+
+/* 削除確認ダイアログ */
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.delete-confirm-dialog {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(135, 206, 250, 0.2);
+}
+
+.delete-confirm-dialog h3 {
+  color: #4682B4;
+  margin: 0 0 15px 0;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.delete-confirm-dialog p {
+  color: #666;
+  margin: 10px 0;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.delete-confirm-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.cancel-btn {
+  padding: 10px 20px;
+  background: #87CEEB;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(135, 206, 250, 0.3);
+}
+
+.cancel-btn:hover {
+  background: #4682B4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(135, 206, 250, 0.4);
+}
+
+.confirm-delete-btn {
+  padding: 10px 20px;
+  background: #FF6B6B;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.confirm-delete-btn:hover {
+  background: #FF5252;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+  .delete-confirm-dialog {
+    padding: 20px;
+    margin: 20px;
+  }
+
+  .delete-confirm-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cancel-btn,
+  .confirm-delete-btn {
+    width: 100%;
+    padding: 12px 20px;
+  }
 } 

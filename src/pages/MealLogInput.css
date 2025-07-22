@@ -233,6 +233,7 @@
 }
 
 .meal-prep-item {
+  position: relative;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 15px;
   padding: 20px;
@@ -240,11 +241,6 @@
   border: 1px solid rgba(135, 206, 250, 0.3);
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
-  cursor: pointer;
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
 }
 
 .meal-prep-item:hover {
@@ -253,54 +249,59 @@
   border-color: #87CEEB;
 }
 
-.meal-prep-item.selected {
-  border-color: #87CEEB;
-  background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
-  box-shadow: 0 8px 20px rgba(135, 206, 250, 0.3);
-}
+
 
 .meal-prep-info {
-  flex: 1;
+  margin-bottom: 15px;
 }
 
 .meal-prep-info h4 {
   color: #4682B4;
   margin: 0 0 5px 0;
   font-size: 1.1rem;
-  font-weight: 600;
 }
 
 .meal-prep-meta {
   color: #87CEEB;
-  margin: 0 0 10px 0;
+  margin: 0 0 15px 0;
   font-size: 0.9rem;
 }
 
 .meal-prep-notes {
-  margin: 0;
+  margin: 0 0 15px 0;
   color: #666;
   font-size: 0.85rem;
   font-style: italic;
 }
 
-.selection-indicator {
-  margin-left: 15px;
-  display: flex;
-  align-items: center;
-}
-
-.selected-icon {
-  background: #87CEEB;
-  color: white;
-  width: 24px;
-  height: 24px;
+/* 作り置き削除ボタン（右上ゴミ箱マーク） */
+.delete-meal-prep-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(255, 107, 107, 0.1);
   border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  color: #ff6b6b;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  font-weight: bold;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 107, 107, 0.2);
 }
+
+.delete-meal-prep-button:hover {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
 
 /* 食材セクション */
 .ingredients-section {

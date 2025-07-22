@@ -73,6 +73,7 @@ const MealPrepInput: React.FC = () => {
         name: mealPrepName.trim(),
         date: selectedDate,
         ingredients: Object.keys(consumptionUpdates),
+        ingredientConsumption: consumptionUpdates, // 各食材の消費率情報を保存
         consumptionRate: 0,
         ...(notes.trim() ? { notes: notes.trim() } : {}),
         createdAt: new Date().toISOString(),

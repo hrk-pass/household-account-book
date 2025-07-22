@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import type { User } from 'firebase/auth';
 import type { AppState, AppAction, Expense, Category, MealLog, MealPrepItem } from '../types';
 import { auth } from '../lib/firebase';
-import { expenseService, categoryService, mealLogService } from '../lib/firestore';
+import { expenseService, categoryService, mealLogService, mealPrepService } from '../lib/firestore';
 
 // 初期状態
 const initialState: AppState = {
@@ -156,6 +156,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_EXPENSES', payload: [] });
         dispatch({ type: 'SET_CATEGORIES', payload: [] });
         dispatch({ type: 'SET_MEAL_LOGS', payload: [] });
+        dispatch({ type: 'SET_MEAL_PREP_ITEMS', payload: [] });
       }
     });
 
@@ -169,6 +170,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     let unsubscribeExpenses: (() => void) | undefined;
     let unsubscribeCategories: (() => void) | undefined;
     let unsubscribeMealLogs: (() => void) | undefined;
+    let unsubscribeMealPrepItems: (() => void) | undefined;
 
     try {
       // 支出をリアルタイム監視
@@ -185,6 +187,11 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
       unsubscribeMealLogs = mealLogService.subscribeToMealLogs(user.uid, (mealLogs) => {
         dispatch({ type: 'SET_MEAL_LOGS', payload: mealLogs });
       });
+
+      // 作り置きをリアルタイム監視
+      unsubscribeMealPrepItems = mealPrepService.subscribeToMealPrepItems(user.uid, (mealPrepItems) => {
+        dispatch({ type: 'SET_MEAL_PREP_ITEMS', payload: mealPrepItems });
+      });
     } catch (error) {
       console.error('データ監視エラー:', error);
     }
@@ -193,6 +200,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
       unsubscribeExpenses?.();
       unsubscribeCategories?.();
       unsubscribeMealLogs?.();
+      unsubscribeMealPrepItems?.();
     };
   }, [user]);
 
@@ -298,13 +306,12 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // 作り置き操作（一時的にダミー実装）
+  // 作り置き操作（Firestore実装）
   const addMealPrepItem = async (mealPrepItem: Omit<MealPrepItem, 'id'>) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      // TODO: mealPrepServiceを実装後に置き換え
-      const newItem = { ...mealPrepItem, id: Date.now().toString() };
-      dispatch({ type: 'ADD_MEAL_PREP_ITEM', payload: newItem });
+      await mealPrepService.addMealPrepItem(user.uid, mealPrepItem);
+      // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('作り置き追加エラー:', error);
       throw error;
@@ -314,8 +321,8 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const updateMealPrepItem = async (mealPrepItem: MealPrepItem) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      // TODO: mealPrepServiceを実装後に置き換え
-      dispatch({ type: 'UPDATE_MEAL_PREP_ITEM', payload: mealPrepItem });
+      await mealPrepService.updateMealPrepItem(user.uid, mealPrepItem.id, mealPrepItem);
+      // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('作り置き更新エラー:', error);
       throw error;
@@ -325,8 +332,43 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const deleteMealPrepItem = async (id: string) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      // TODO: mealPrepServiceを実装後に置き換え
-      dispatch({ type: 'DELETE_MEAL_PREP_ITEM', payload: id });
+      // 作り置きアイテムを取得
+      const mealPrepItem = state.mealPrepItems.find(item => item.id === id);
+      
+      if (mealPrepItem) {
+        // 作り置きに使用された食材の消費率を戻す
+        // 保存された食材の消費率情報を使って復元
+        const ingredientConsumption = mealPrepItem.ingredientConsumption || {};
+        
+        // 各食材の消費率を更新
+        for (const ingredientId of mealPrepItem.ingredients) {
+          const expense = state.expenses.find(e => e.id === ingredientId);
+          let consumptionToRestore = ingredientConsumption[ingredientId] || 0;
+          
+          // 既存データでingredientConsumptionがない場合のフォールバック
+          if (consumptionToRestore === 0 && Object.keys(ingredientConsumption).length === 0) {
+            // 作り置きの消費率に応じて、食材の消費率を比例的に戻す（簡易的な処理）
+            const mealPrepConsumptionRate = mealPrepItem.consumptionRate;
+            if (expense && expense.consumptionRate !== undefined) {
+              consumptionToRestore = Math.min(expense.consumptionRate, mealPrepConsumptionRate);
+            }
+          }
+          
+          if (expense && expense.consumptionRate !== undefined) {
+            const newConsumptionRate = Math.max(0, expense.consumptionRate - consumptionToRestore);
+            
+            console.log(`食材 ${expense.description}: ${expense.consumptionRate}% → ${newConsumptionRate}% (戻し量: ${consumptionToRestore}%)`);
+            
+            await updateExpense({
+              ...expense,
+              consumptionRate: newConsumptionRate
+            });
+          }
+        }
+      }
+      
+      await mealPrepService.deleteMealPrepItem(user.uid, id);
+      // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('作り置き削除エラー:', error);
       throw error;

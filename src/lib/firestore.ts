@@ -11,7 +11,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Expense, Category, MealLog } from '../types';
+import type { Expense, Category, MealLog, MealPrepItem } from '../types';
 
 // ユーザーごとのコレクション名を取得
 const getUserCollection = (userId: string, collectionName: string) => {
@@ -285,6 +285,95 @@ export const mealLogService = {
       callback(mealLogs);
     }, (error) => {
       console.error('食事ログ監視エラー:', error);
+    });
+
+    return unsubscribe;
+  }
+};
+
+// 作り置き関連の操作
+export const mealPrepService = {
+  // 作り置きを追加
+  async addMealPrepItem(userId: string, mealPrepItem: Omit<MealPrepItem, 'id'>): Promise<string> {
+    try {
+      const mealPrepItemWithTimestamp = {
+        ...mealPrepItem,
+        date: Timestamp.fromDate(new Date(mealPrepItem.date))
+      };
+      const docRef = await addDoc(getUserCollection(userId, 'mealPrepItems'), mealPrepItemWithTimestamp);
+      return docRef.id;
+    } catch (error) {
+      console.error('作り置き追加エラー:', error);
+      throw error;
+    }
+  },
+
+  // 作り置きを更新
+  async updateMealPrepItem(userId: string, mealPrepItemId: string, updates: Partial<MealPrepItem>): Promise<void> {
+    try {
+      const mealPrepItemDoc = doc(getUserCollection(userId, 'mealPrepItems'), mealPrepItemId);
+      const updatesWithTimestamp = updates.date 
+        ? { ...updates, date: Timestamp.fromDate(new Date(updates.date)) }
+        : updates;
+      await updateDoc(mealPrepItemDoc, updatesWithTimestamp);
+    } catch (error) {
+      console.error('作り置き更新エラー:', error);
+      throw error;
+    }
+  },
+
+  // 作り置きを削除
+  async deleteMealPrepItem(userId: string, mealPrepItemId: string): Promise<void> {
+    try {
+      const mealPrepItemDoc = doc(getUserCollection(userId, 'mealPrepItems'), mealPrepItemId);
+      await deleteDoc(mealPrepItemDoc);
+    } catch (error) {
+      console.error('作り置き削除エラー:', error);
+      throw error;
+    }
+  },
+
+  // 作り置き一覧を取得
+  async getMealPrepItems(userId: string): Promise<MealPrepItem[]> {
+    try {
+      const q = query(
+        getUserCollection(userId, 'mealPrepItems'),
+        orderBy('date', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.date.toDate().toISOString().split('T')[0] // Timestampを文字列に変換
+        } as MealPrepItem;
+      });
+    } catch (error) {
+      console.error('作り置き取得エラー:', error);
+      throw error;
+    }
+  },
+
+  // リアルタイムで作り置きを監視
+  subscribeToMealPrepItems(userId: string, callback: (mealPrepItems: MealPrepItem[]) => void): () => void {
+    const q = query(
+      getUserCollection(userId, 'mealPrepItems'),
+      orderBy('date', 'desc')
+    );
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const mealPrepItems = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.date.toDate().toISOString().split('T')[0]
+        } as MealPrepItem;
+      });
+      callback(mealPrepItems);
+    }, (error) => {
+      console.error('作り置き監視エラー:', error);
     });
 
     return unsubscribe;

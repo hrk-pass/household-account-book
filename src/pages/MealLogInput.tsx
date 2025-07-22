@@ -6,7 +6,7 @@ import './MealLogInput.css';
 
 const MealLogInput: React.FC = () => {
   const navigate = useNavigate();
-  const { state, updateExpense, addMealLog, updateMealPrepItem } = useExpense();
+  const { state, updateExpense, addMealLog, updateMealPrepItem, deleteMealPrepItem } = useExpense();
   
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
   const [selectedMealType, setSelectedMealType] = useState<MealType>('朝食');
@@ -55,6 +55,21 @@ const MealLogInput: React.FC = () => {
       ...prev,
       [itemId]: newRate
     }));
+  };
+
+  // 作り置きを削除
+  const handleDeleteMealPrep = async (itemId: string, itemName: string) => {
+    const confirmed = window.confirm(`「${itemName}」を削除しますか？\n\n※ この作り置きに使用された食材の消費率も元に戻ります。`);
+    
+    if (confirmed) {
+      try {
+        await deleteMealPrepItem(itemId);
+        alert(`「${itemName}」を削除しました。\n食材の消費率も元に戻りました。`);
+      } catch (error) {
+        console.error('作り置き削除エラー:', error);
+        alert('作り置きの削除に失敗しました');
+      }
+    }
   };
 
   // 未使用状態を切り替え
@@ -215,6 +230,15 @@ const MealLogInput: React.FC = () => {
                       
                       return (
                         <div key={item.id} className="meal-prep-item">
+                          <button
+                            type="button"
+                            className="delete-meal-prep-button"
+                            onClick={() => handleDeleteMealPrep(item.id, item.name)}
+                            title="削除"
+                          >
+                            🗑️
+                          </button>
+                          
                           <div className="meal-prep-info">
                             <h4>{item.name}</h4>
                             <p className="meal-prep-meta">
@@ -389,6 +413,7 @@ const MealLogInput: React.FC = () => {
           <ul>
             <li><strong>食材を使用</strong>：家にある食材の消費率を10%単位で記録</li>
             <li><strong>作り置きを使用</strong>：事前に作成した作り置き料理の消費率を10%単位で記録（消費率が100%になると非表示）</li>
+            <li><strong>作り置き削除</strong>：作り置きを削除すると、使用された食材の消費率も元に戻ります</li>
             <li><strong>食材未使用</strong>：外食やお弁当購入時などに選択</li>
             <li>複数の食材や作り置きを同時に記録できます</li>
             <li>消費率が100%になった食材は次回から表示されません</li>

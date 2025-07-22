@@ -84,6 +84,7 @@ export interface MealPrepItem {
   name: string;
   date: string; // YYYY-MM-DD形式（作り置きした日）
   ingredients: string[]; // 使用した食材のExpense ID
+  ingredientConsumption: { [ingredientId: string]: number }; // 各食材の消費率
   consumptionRate: number; // 消費率（0-100）
   isUsed?: boolean; // 使用済みかどうか
   notes?: string;
