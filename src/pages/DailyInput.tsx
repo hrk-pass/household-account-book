@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useExpense } from '../contexts/ExpenseContext';
 import './DailyInput.css';
@@ -11,7 +11,7 @@ interface ExpenseItem {
 
 const DailyInput: React.FC = () => {
   const navigate = useNavigate();
-  const { state, addExpense } = useExpense();
+  const { addExpense } = useExpense();
   
   const [formData, setFormData] = useState({
     date: new Date().toISOString().slice(0, 10),
