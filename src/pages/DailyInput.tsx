@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useExpense } from '../contexts/ExpenseContext';
 import './DailyInput.css';
 
+type TaxType = '外税8%' | '外税10%' | '内税';
+
 interface ExpenseItem {
   id: string;
   amount: string;
   description: string;
+  taxType: TaxType;
 }
 
 const DailyInput: React.FC = () => {
@@ -19,7 +22,7 @@ const DailyInput: React.FC = () => {
   });
   
   const [items, setItems] = useState<ExpenseItem[]>([
-    { id: '1', amount: '', description: '' }
+    { id: '1', amount: '', description: '', taxType: '外税10%' }
   ]);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +36,7 @@ const DailyInput: React.FC = () => {
     }));
   };
 
-  const handleItemChange = (id: string, field: 'amount' | 'description', value: string) => {
+  const handleItemChange = (id: string, field: keyof ExpenseItem, value: string) => {
     setItems(prevItems => {
       const newItems = prevItems.map(item =>
         item.id === id ? { ...item, [field]: value } : item
@@ -43,7 +46,7 @@ const DailyInput: React.FC = () => {
       const lastItem = newItems[newItems.length - 1];
       if (lastItem.id === id && (lastItem.amount || lastItem.description)) {
         const newId = (parseInt(lastItem.id) + 1).toString();
-        newItems.push({ id: newId, amount: '', description: '' });
+        newItems.push({ id: newId, amount: '', description: '', taxType: '外税10%' });
       }
       
       return newItems;
@@ -55,7 +58,7 @@ const DailyInput: React.FC = () => {
       const newItems = prevItems.filter(item => item.id !== id);
       // 最低1行は残す
       if (newItems.length === 0) {
-        return [{ id: '1', amount: '', description: '' }];
+        return [{ id: '1', amount: '', description: '', taxType: '外税10%' }];
       }
       return newItems;
     });
@@ -63,7 +66,20 @@ const DailyInput: React.FC = () => {
 
   const addItem = () => {
     const newId = (Math.max(...items.map(item => parseInt(item.id))) + 1).toString();
-    setItems(prev => [...prev, { id: newId, amount: '', description: '' }]);
+    setItems(prev => [...prev, { id: newId, amount: '', description: '', taxType: '外税10%' }]);
+  };
+
+  const calculateTaxIncludedAmount = (amount: number, taxType: TaxType): number => {
+    switch (taxType) {
+      case '外税8%':
+        return amount * 1.08;
+      case '外税10%':
+        return amount * 1.1;
+      case '内税':
+        return amount;
+      default:
+        return amount;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,17 +103,20 @@ const DailyInput: React.FC = () => {
 
     try {
       for (const item of validItems) {
-        const amount = parseFloat(item.amount.replace(/,/g, ''));
+        const baseAmount = parseFloat(item.amount.replace(/,/g, ''));
         
-        if (isNaN(amount) || amount <= 0) {
+        if (isNaN(baseAmount) || baseAmount <= 0) {
           alert(`明細「${item.description}」の金額が正しくありません`);
           setIsSubmitting(false);
           return;
         }
 
+        // 税込金額を計算
+        const taxIncludedAmount = calculateTaxIncludedAmount(baseAmount, item.taxType);
+
         const expenseData: any = {
           date: formData.date,
-          amount: amount,
+          amount: taxIncludedAmount,
           description: item.description.trim(),
           storeName: formData.storeName.trim(),
           createdAt: new Date().toISOString(),
@@ -114,7 +133,7 @@ const DailyInput: React.FC = () => {
       });
 
       // 明細をクリア
-      setItems([{ id: '1', amount: '', description: '' }]);
+      setItems([{ id: '1', amount: '', description: '', taxType: '外税10%' }]);
 
       setTimeout(() => {
         setShowSuccess(false);
@@ -131,8 +150,9 @@ const DailyInput: React.FC = () => {
   const getTotalAmount = () => {
     return items.reduce((total, item) => {
       if (!item.amount.trim()) return total;
-      const amount = parseFloat(item.amount.replace(/,/g, ''));
-      return total + (isNaN(amount) ? 0 : amount);
+      const baseAmount = parseFloat(item.amount.replace(/,/g, ''));
+      if (isNaN(baseAmount)) return total;
+      return total + calculateTaxIncludedAmount(baseAmount, item.taxType);
     }, 0);
   };
 
@@ -211,6 +231,7 @@ const DailyInput: React.FC = () => {
                   <tr>
                     <th className="row-header">#</th>
                     <th className="amount-header">金額 (円)</th>
+                    <th className="tax-type-header">税率</th>
                     <th className="description-header">支出内容</th>
                     <th className="action-header">操作</th>
                   </tr>
@@ -237,6 +258,17 @@ const DailyInput: React.FC = () => {
                           placeholder="金額を入力"
                           className="cell-input"
                         />
+                      </td>
+                      <td className="tax-type-cell">
+                        <select
+                          value={item.taxType}
+                          onChange={(e) => handleItemChange(item.id, 'taxType', e.target.value as TaxType)}
+                          className="tax-type-select"
+                        >
+                          <option value="外税8%">外税8%</option>
+                          <option value="外税10%">外税10%</option>
+                          <option value="内税">内税</option>
+                        </select>
                       </td>
                       <td className="description-cell">
                         <input
@@ -302,6 +334,7 @@ const DailyInput: React.FC = () => {
             <li><strong>×ボタン</strong>: 該当行を削除</li>
             <li><strong>自動追加</strong>: 最後の行に入力すると自動的に新しい行が追加されます</li>
             <li><strong>数値フォーマット</strong>: 金額欄はフォーカスを外すと自動的にカンマ区切りになります</li>
+            <li><strong>税率選択</strong>: 各明細の税率を選択できます（外税8%、外税10%、内税）</li>
           </ul>
         </div>
       </div>
