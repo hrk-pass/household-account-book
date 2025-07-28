@@ -289,6 +289,12 @@
   text-align: right;
 }
 
+.expense-storeName {
+  font-size: 0.85rem;
+  color: #bbb;
+  margin-top: 2px;
+}
+
 .expense-actions {
   display: flex;
   flex-direction: column;
@@ -366,6 +372,111 @@
 .category-summary {
   font-size: 0.9rem;
   color: #bbb;
+}
+
+.category-manage-section {
+  background: rgba(45, 45, 45, 0.9);
+  border: 1px solid rgba(201, 169, 110, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(201, 169, 110, 0.1);
+}
+
+.category-manage-section h3 {
+  color: #e8e8e8;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  background: rgba(60, 60, 60, 0.7);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  color: #e8e8e8;
+  font-size: 1rem;
+}
+
+.category-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-right: 8px;
+  border: 1.5px solid #fff2;
+}
+
+.edit-category-btn, .delete-category-btn {
+  background: none;
+  border: none;
+  color: #c9a96e;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.edit-category-btn:hover {
+  background: #c9a96e22;
+}
+
+.delete-category-btn {
+  color: #e57373;
+}
+
+.delete-category-btn:hover {
+  background: #e5737322;
+}
+
+/* 編集モーダルの調整 */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #232323;
+  border-radius: 12px;
+  padding: 2rem 2.5rem;
+  min-width: 320px;
+  max-width: 95vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  color: #e8e8e8;
+}
+
+.color-picker {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.color-option {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #fff2;
+  cursor: pointer;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.color-option.selected {
+  border: 2.5px solid #c9a96e;
 }
 
 @media (max-width: 768px) {

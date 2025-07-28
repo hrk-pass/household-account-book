@@ -61,13 +61,13 @@ export type AppAction =
 // 食事Log機能用の型定義
 export type KitchenSubCategory = '食材' | '調味料' | '消耗品' | 'その他';
 
-export type MealType = '朝食' | '昼食' | '夕食' | '間食';
+export type MealType = 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
 
 export interface MealLog {
   id: string;
   date: string; // YYYY-MM-DD形式
   mealType: MealType;
-  ingredients: string[]; // 使用した食材のExpense ID
+  ingredients: { id: string; usedRate: number }[]; // 使用した食材のExpense IDと消費率
   mealPrepItems?: string[]; // 使用した作り置きのID
   notes?: string;
   createdAt: string;

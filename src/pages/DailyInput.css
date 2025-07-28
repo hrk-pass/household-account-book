@@ -676,6 +676,26 @@
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
+.rounding-type-cell {
+  width: 110px;
+  text-align: center;
+}
+
+.rounding-type-select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+  color: #333;
+}
+
+.rounding-type-select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
 /* モバイル対応 */
 @media (max-width: 768px) {
   .form-header {

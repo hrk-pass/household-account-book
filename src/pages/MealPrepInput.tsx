@@ -37,7 +37,7 @@ const MealPrepInput: React.FC = () => {
     });
     
     const foodItems = kitchenExpenses
-      .filter(expense => expense.subCategory === '食材')
+      .filter(expense => expense.subCategory === 'Ingredient')
       .map(expense => ({
         ...expense,
         consumptionRate: expense.consumptionRate ?? 0,
@@ -89,12 +89,12 @@ const MealPrepInput: React.FC = () => {
     e.preventDefault();
     
     if (!mealPrepName.trim()) {
-      alert('作り置きの名前を入力してください');
+      alert('Please enter a name for the meal prep');
       return;
     }
 
     if (Object.keys(consumptionUpdates).length === 0) {
-      alert('少なくとも1つの食材の消費率を更新してください');
+      alert('Please update the consumption rate for at least one ingredient');
       return;
     }
 
@@ -126,14 +126,14 @@ const MealPrepInput: React.FC = () => {
       });
 
       // 成功メッセージを表示してリセット
-      alert(`${mealPrepName}の作り置き記録が完了しました`);
+      alert(`${mealPrepName} meal prep has been recorded`);
       setMealPrepName('');
       setNotes('');
       setConsumptionUpdates({});
 
     } catch (error) {
       console.error('作り置き保存エラー:', error);
-      alert('作り置きの保存に失敗しました');
+      alert('Failed to save meal prep');
     } finally {
       setIsSubmitting(false);
     }
@@ -143,28 +143,28 @@ const MealPrepInput: React.FC = () => {
     <div className="meal-prep-input">
       <div className="meal-prep-input-container">
         <header className="meal-prep-input-header">
-          <h1>作り置き入力</h1>
-          <p>作り置きした料理の記録</p>
+          <h1>Meal Prep Input</h1>
+          <p>Record pre-made dishes</p>
         </header>
 
         <form onSubmit={handleSubmit} className="meal-prep-form">
           {/* 基本情報 */}
           <div className="meal-prep-basic-info">
             <div className="form-group">
-              <label htmlFor="name">作り置き名 *</label>
+              <label htmlFor="name">Meal Prep Name *</label>
               <input
                 type="text"
                 id="name"
                 value={mealPrepName}
                 onChange={(e) => setMealPrepName(e.target.value)}
-                placeholder="例：カレー、味噌汁、おにぎり"
+                placeholder="e.g. Curry, Miso Soup, Rice Ball"
                 className="form-input"
                 required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="date">作り置き日</label>
+              <label htmlFor="date">Meal Prep Date</label>
               <input
                 type="date"
                 id="date"
@@ -180,7 +180,7 @@ const MealPrepInput: React.FC = () => {
           {/* 食材消費率入力 */}
           <div className="ingredients-section">
             <div className="section-header">
-              <h3>食材の消費率を入力 ({availableFoodItems.length}件)</h3>
+              <h3>Enter Consumption Rate for Ingredients ({availableFoodItems.length})</h3>
               <button
                 type="button"
                 onClick={() => {
@@ -228,8 +228,8 @@ const MealPrepInput: React.FC = () => {
             
             {availableFoodItems.length === 0 ? (
               <div className="no-ingredients">
-                <p>使用可能な食材がありません</p>
-                <p>まず食材をkitchenカテゴリーで購入記録してください</p>
+                <p>No available ingredients</p>
+                <p>Please record ingredients in the "kitchen" category first</p>
               </div>
             ) : (
               <div className="ingredients-grid">
@@ -243,11 +243,11 @@ const MealPrepInput: React.FC = () => {
                       <div className="ingredient-info">
                         <h4>{item.description}</h4>
                         <p className="ingredient-meta">
-                          ¥{item.amount.toLocaleString()} | {item.date}
+                          ¥{item.amount.toLocaleString('en-US')} | {item.date}
                         </p>
                         
                         <div className="consumption-display">
-                          <span>現在の消費率: {currentConsumption}%</span>
+                          <span>Current: {currentConsumption}%</span>
                           <div className="consumption-bar">
                             <div 
                               className="consumption-fill current"
@@ -264,13 +264,13 @@ const MealPrepInput: React.FC = () => {
                             )}
                           </div>
                           <span className="total-consumption">
-                            合計: {totalConsumption}%
+                            Total: {totalConsumption}%
                           </span>
                         </div>
                       </div>
 
                       <div className="consumption-input">
-                        <label>今回の使用量</label>
+                        <label>Usage This Time</label>
                         <div className="consumption-buttons">
                           {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
                             .filter(option => option <= 100 - currentConsumption)
@@ -295,12 +295,12 @@ const MealPrepInput: React.FC = () => {
 
           {/* メモ入力 */}
           <div className="form-group">
-            <label htmlFor="notes">メモ（任意）</label>
+            <label htmlFor="notes">Notes (optional)</label>
             <textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="レシピや保存方法、注意点などを記録..."
+              placeholder="Record recipes, storage methods, notes, etc..."
               className="form-textarea"
               rows={3}
             />
@@ -314,27 +314,27 @@ const MealPrepInput: React.FC = () => {
               className="cancel-button"
               disabled={isSubmitting}
             >
-              キャンセル
+              Cancel
             </button>
             <button
               type="submit"
               className="submit-button"
               disabled={isSubmitting || !mealPrepName.trim() || Object.keys(consumptionUpdates).length === 0}
             >
-              {isSubmitting ? '記録中...' : '作り置きを記録'}
+              {isSubmitting ? 'Recording...' : 'Record Meal Prep'}
             </button>
           </div>
         </form>
 
         {/* 使用ガイド */}
         <div className="usage-guide">
-          <h3>◆ 使用方法</h3>
+          <h3>◆ Usage Guide</h3>
           <ul>
-            <li><strong>作り置き名</strong>：料理の名前を入力（例：カレー、味噌汁）</li>
-            <li><strong>食材の消費率</strong>：使用した食材の消費率を10%単位で記録</li>
-            <li>作り置きした料理は食事入力時に選択できます</li>
-            <li>食材の消費率は作り置き作成時に更新されます</li>
-            <li>作り置きの消費率は食事入力時に記録できます</li>
+            <li><strong>Meal Prep Name</strong>: Enter the name of the dish (e.g. Curry, Miso Soup)</li>
+            <li><strong>Ingredient Consumption Rate</strong>: Record the consumption rate of used ingredients in 10% increments</li>
+            <li>Meal preps can be selected when inputting meals</li>
+            <li>Ingredient consumption rates are updated when creating meal preps</li>
+            <li>Meal prep consumption rates can be recorded when inputting meals</li>
           </ul>
         </div>
       </div>

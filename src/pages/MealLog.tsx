@@ -45,7 +45,7 @@ const MealLog: React.FC = () => {
   }, [state.expenses, state.categories]);
 
   // サブカテゴリーの選択肢
-  const subCategoryOptions = ['食材', '調味料', '消耗品', 'その他'];
+  const subCategoryOptions = ['Ingredient', 'Seasoning', 'Consumable', 'Other'];
 
   // サブカテゴリーを更新
   const handleSubCategoryChange = async (expenseId: string, subCategory: string) => {
@@ -70,7 +70,7 @@ const MealLog: React.FC = () => {
         }, 2000);
       } catch (error) {
         console.error('サブカテゴリー更新エラー:', error);
-        alert('サブカテゴリー更新に失敗しました');
+        alert('Failed to update subcategory');
       }
     }
   };
@@ -82,25 +82,25 @@ const MealLog: React.FC = () => {
     <div className="meal-log">
       <div className="meal-log-container">
         <header className="meal-log-header">
-          <h1>食事Log</h1>
-          <p>キッチン用品と食材の管理</p>
+          <h1>Meal Log</h1>
+          <p>Manage kitchen items and ingredients</p>
         </header>
 
         <div className="content">
           {/* サマリー情報 */}
           <div className="kitchen-summary">
             <div className="summary-item">
-              <span className="summary-label">総支出</span>
-              <span className="summary-value">¥{totalAmount.toLocaleString()}</span>
+              <span className="summary-label">Total</span>
+              <span className="summary-value">¥{totalAmount.toLocaleString('en-US')}</span>
             </div>
             <div className="summary-item">
-              <span className="summary-label">明細件数</span>
-              <span className="summary-value">{kitchenExpenses.length}件</span>
+              <span className="summary-label">Count</span>
+              <span className="summary-value">{kitchenExpenses.length} items</span>
             </div>
             <div className="summary-item">
-              <span className="summary-label">サブカテゴリー数</span>
+              <span className="summary-label">Subcategories</span>
               <span className="summary-value">
-                {new Set(kitchenExpenses.map(e => e.subCategory).filter(Boolean)).size}分類
+                {new Set(kitchenExpenses.map(e => e.subCategory).filter(Boolean)).size}
               </span>
             </div>
           </div>
@@ -109,13 +109,13 @@ const MealLog: React.FC = () => {
           {kitchenExpenses.length > 0 ? (
             <div className="kitchen-expenses">
               <div className="expenses-section">
-                <h3>キッチン明細一覧（日付順）</h3>
+                <h3>Kitchen Items (by date)</h3>
                 
                 <div className="expenses-list">
                   {kitchenExpenses.map((expense) => (
                     <div key={expense.id} className="expense-item">
                       <div className="expense-date">
-                        {new Date(expense.date).toLocaleDateString('ja-JP', {
+                        {new Date(expense.date).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           weekday: 'short'
@@ -133,7 +133,7 @@ const MealLog: React.FC = () => {
                           onChange={(e) => handleSubCategoryChange(expense.id, e.target.value)}
                           className="subcategory-select"
                         >
-                          <option value="">未設定</option>
+                          <option value="">Unset</option>
                           {subCategoryOptions.map(option => (
                             <option key={option} value={option}>{option}</option>
                           ))}
@@ -143,7 +143,7 @@ const MealLog: React.FC = () => {
                       {/* 消費率表示 */}
                       {expense.consumptionRate !== undefined && (
                         <div className="consumption-rate">
-                          <span className="rate-label">消費率</span>
+                          <span className="rate-label">Consumption Rate</span>
                           <span className="rate-value">{expense.consumptionRate}%</span>
                           <div className="consumption-bar">
                             <div 
@@ -152,7 +152,7 @@ const MealLog: React.FC = () => {
                             />
                           </div>
                           {expense.consumptionRate >= 100 && (
-                            <span className="consumed-label">完了</span>
+                            <span className="consumed-label">Consumed</span>
                           )}
                         </div>
                       )}
@@ -163,8 +163,8 @@ const MealLog: React.FC = () => {
             </div>
           ) : (
             <div className="empty-state">
-              <p>カテゴリー「kitchen」の明細がありません</p>
-              <p>支出入力でカテゴリーを「kitchen」に設定してください</p>
+              <p>No kitchen items found in category "kitchen"</p>
+              <p>Set the category to "kitchen" in Expense Input</p>
             </div>
           )}
         </div>

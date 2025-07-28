@@ -27,11 +27,11 @@ const MonthlySummaryPage: React.FC = () => {
 
   // 月の名前を取得
   const getMonthName = (offset: number) => {
-    if (offset === 0) return '今月';
-    if (offset === -1) return '先月';
-    if (offset === 1) return '来月';
-    if (offset < 0) return `${Math.abs(offset)}ヶ月前`;
-    return `${offset}ヶ月後`;
+    if (offset === 0) return 'This Month';
+    if (offset === -1) return 'Last Month';
+    if (offset === 1) return 'Next Month';
+    if (offset < 0) return `${Math.abs(offset)} months ago`;
+    return `${offset} months later`;
   };
 
   // 選択された月の集計データを計算
@@ -49,7 +49,7 @@ const MonthlySummaryPage: React.FC = () => {
     monthExpenses.forEach(expense => {
       const categoryId = expense.category || 'uncategorized';
       const category = expense.category ? state.categories.find(c => c.id === expense.category) : null;
-      const categoryName = category?.name || '未分類';
+      const categoryName = category?.name || 'Uncategorized';
       const color = category?.color || '#CCCCCC';
       
       if (categoryBreakdown.has(categoryId)) {
@@ -125,8 +125,8 @@ const MonthlySummaryPage: React.FC = () => {
     <div className="monthly-summary">
       <div className="monthly-summary-container">
         <header className="monthly-summary-header">
-          <h1>月次集計</h1>
-          <p>月ごとの支出分析とレポート</p>
+          <h1>Monthly Summary</h1>
+          <p>Monthly expense analysis and report</p>
         </header>
 
         {/* 月選択 */}
@@ -135,17 +135,17 @@ const MonthlySummaryPage: React.FC = () => {
             onClick={() => setSelectedMonthOffset(selectedMonthOffset - 1)}
             className="month-nav-button prev"
           >
-            ← 前月
+            ← Last Month
           </button>
           <div className="month-info">
             <h2>{monthInfo.displayName}</h2>
-            <p>{monthInfo.year}年{monthInfo.month}月</p>
+            <p>{monthInfo.year} / {monthInfo.month}</p>
           </div>
           <button
             onClick={() => setSelectedMonthOffset(selectedMonthOffset + 1)}
             className="month-nav-button next"
           >
-            翌月 →
+            Next Month →
           </button>
         </div>
 
@@ -154,8 +154,8 @@ const MonthlySummaryPage: React.FC = () => {
           <div className="summary-card total">
             <div className="summary-icon">◈</div>
             <div className="summary-content">
-              <h3>総支出</h3>
-              <p className="summary-amount">¥{monthlySummary.totalAmount.toLocaleString()}</p>
+              <h3>Total Expense</h3>
+              <p className="summary-amount">¥{monthlySummary.totalAmount.toLocaleString('en-US')}</p>
               <div className={`summary-change ${changeFromPrevious >= 0 ? 'increase' : 'decrease'}`}>
                 {changeFromPrevious >= 0 ? '▲' : '▼'} 
                 ¥{Math.abs(changeFromPrevious).toLocaleString()}
@@ -167,18 +167,18 @@ const MonthlySummaryPage: React.FC = () => {
           <div className="summary-card average">
             <div className="summary-icon">●</div>
             <div className="summary-content">
-              <h3>1日平均</h3>
-              <p className="summary-amount">¥{averageDailyExpense.toLocaleString()}</p>
-              <p className="summary-detail">支出日数: {dailyExpenses.filter(d => d.amount > 0).length}日</p>
+              <h3>Avg. per day</h3>
+              <p className="summary-amount">¥{averageDailyExpense.toLocaleString('en-US')}</p>
+              <p className="summary-detail">Days with expenses: {dailyExpenses.filter(d => d.amount > 0).length}</p>
             </div>
           </div>
 
           <div className="summary-card categories">
             <div className="summary-icon">◆</div>
             <div className="summary-content">
-              <h3>カテゴリー数</h3>
+              <h3>Categories</h3>
               <p className="summary-amount">{monthlySummary.categoryBreakdown.length}</p>
-              <p className="summary-detail">最大日次: ¥{maxDailyExpense.toLocaleString()}</p>
+              <p className="summary-detail">Max per day: ¥{maxDailyExpense.toLocaleString('en-US')}</p>
             </div>
           </div>
         </div>
@@ -186,7 +186,7 @@ const MonthlySummaryPage: React.FC = () => {
         {/* カテゴリー別詳細 */}
         {monthlySummary.categoryBreakdown.length > 0 && (
           <div className="category-breakdown">
-            <h3>カテゴリー別内訳</h3>
+            <h3>Category Breakdown</h3>
             <div className="breakdown-list">
               {monthlySummary.categoryBreakdown.map((item, index) => (
                 <div key={index} className="breakdown-item">
@@ -199,7 +199,7 @@ const MonthlySummaryPage: React.FC = () => {
                       <span className="category-name">{item.category}</span>
                     </div>
                     <div className="breakdown-amount">
-                      ¥{item.amount.toLocaleString()}
+                      ¥{item.amount.toLocaleString('en-US')}
                     </div>
                   </div>
                   <div className="breakdown-details">
@@ -214,8 +214,8 @@ const MonthlySummaryPage: React.FC = () => {
                     </div>
                     <div className="breakdown-stats">
                       <span>{item.percentage.toFixed(1)}%</span>
-                      <span>{item.count}件</span>
-                      <span>平均 ¥{Math.round(item.amount / item.count).toLocaleString()}</span>
+                      <span>{item.count} items</span>
+                      <span>Avg. ¥{Math.round(item.amount / item.count).toLocaleString('en-US')}</span>
                     </div>
                   </div>
                 </div>
@@ -226,7 +226,7 @@ const MonthlySummaryPage: React.FC = () => {
 
         {/* 日別支出グラフ */}
         <div className="daily-chart">
-          <h3>日別支出推移</h3>
+          <h3>Daily Expense Trend</h3>
           <div className="chart-container">
             <div className="chart-grid">
               {dailyExpenses.map((data, index) => (
@@ -236,7 +236,7 @@ const MonthlySummaryPage: React.FC = () => {
                     style={{
                       height: maxDailyExpense > 0 ? `${(data.amount / maxDailyExpense) * 100}%` : '0%',
                     }}
-                    title={`${data.day}日: ¥${data.amount.toLocaleString()}`}
+                    title={`${data.day}: ¥${data.amount.toLocaleString('en-US')}`}
                   ></div>
                   <div className="bar-label">{data.day}</div>
                 </div>
@@ -244,10 +244,10 @@ const MonthlySummaryPage: React.FC = () => {
             </div>
             <div className="chart-legend">
               <div className="legend-item">
-                <span>最大: ¥{maxDailyExpense.toLocaleString()}</span>
+                <span>Max: ¥{maxDailyExpense.toLocaleString('en-US')}</span>
               </div>
               <div className="legend-item">
-                <span>平均: ¥{averageDailyExpense.toLocaleString()}</span>
+                <span>Avg.: ¥{averageDailyExpense.toLocaleString('en-US')}</span>
               </div>
             </div>
           </div>
@@ -256,33 +256,31 @@ const MonthlySummaryPage: React.FC = () => {
         {/* アドバイス */}
         {monthlySummary.totalAmount > 0 && (
           <div className="advice-section">
-            <h3>💡 今月の分析</h3>
+            <h3>💡 This Month's Analysis</h3>
             <div className="advice-grid">
               <div className="advice-card">
-                <h4>支出パターン</h4>
+                <h4>Expense Pattern</h4>
                 <p>
                   {monthlySummary.categoryBreakdown.length > 0 && 
-                    `最も多い支出は「${monthlySummary.categoryBreakdown[0].category}」で、
-                    全体の${monthlySummary.categoryBreakdown[0].percentage.toFixed(1)}%を占めています。`
+                    `The largest expense is "${monthlySummary.categoryBreakdown[0].category}", accounting for ${monthlySummary.categoryBreakdown[0].percentage.toFixed(1)}% of the total.`
                   }
                 </p>
               </div>
               <div className="advice-card">
-                <h4>前月比較</h4>
+                <h4>Comparison with Last Month</h4>
                 <p>
                   {changeFromPrevious > 0 
-                    ? `前月より¥${changeFromPrevious.toLocaleString()}多く支出しています。`
+                    ? `¥${changeFromPrevious.toLocaleString('en-US')} more spent than last month.`
                     : changeFromPrevious < 0
-                    ? `前月より¥${Math.abs(changeFromPrevious).toLocaleString()}節約できています。`
-                    : '前月と同額の支出です。'
+                    ? `¥${Math.abs(changeFromPrevious).toLocaleString('en-US')} saved compared to last month.`
+                    : 'Same amount spent as last month.'
                   }
                 </p>
               </div>
               <div className="advice-card">
-                <h4>支出頻度</h4>
+                <h4>Expense Frequency</h4>
                 <p>
-                  {dailyExpenses.filter(d => d.amount > 0).length}日間で支出があり、
-                  1日平均¥{averageDailyExpense.toLocaleString()}使っています。
+                  {dailyExpenses.filter(d => d.amount > 0).length} days with expenses, averaging ¥{averageDailyExpense.toLocaleString('en-US')} per day.
                 </p>
               </div>
             </div>
@@ -291,9 +289,9 @@ const MonthlySummaryPage: React.FC = () => {
 
         {monthlySummary.totalAmount === 0 && (
           <div className="empty-state">
-                          <h3>◆ 支出データなし</h3>
-            <p>この月の支出データがありません。</p>
-            <p>日次入力画面から支出を記録してみましょう。</p>
+            <h3>◆ No Expense Data</h3>
+            <p>No expense data for this month.</p>
+            <p>Try recording expenses from the daily input screen.</p>
           </div>
         )}
       </div>

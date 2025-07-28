@@ -6,14 +6,14 @@ const Navigation: React.FC = () => {
   const location = useLocation();
 
   const navItems = [
-    { path: '/', label: 'ホーム', icon: '◆' },
-    { path: '/input', label: '支出入力', icon: '＋' },
-    { path: '/list', label: '支出リスト', icon: '≡' },
-    { path: '/summary', label: '月次集計', icon: '◈' },
-    { path: '/meal-log', label: '食事Log', icon: '🍽' },
-    { path: '/meal-prep-input', label: '作り置き', icon: '🥘' },
-    { path: '/meal-log-input', label: '食事入力', icon: '📝' },
-    { path: '/meal-history', label: '食事記録', icon: '📖' },
+    { path: '/', label: 'Home', icon: '◆' },
+    { path: '/input', label: 'Input', icon: '＋' },
+    { path: '/list', label: 'List', icon: '≡' },
+    { path: '/summary', label: 'Summary', icon: '◈' },
+    { path: '/meal-log', label: 'Meal Log', icon: '🍽' },
+    { path: '/meal-prep-input', label: 'Meal Prep', icon: '🥘' },
+    { path: '/meal-log-input', label: 'Meal Input', icon: '📝' },
+    { path: '/meal-history', label: 'Meal History', icon: '📖' },
   ];
 
   return (

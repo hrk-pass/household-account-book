@@ -18,23 +18,23 @@ const Auth: React.FC<AuthProps> = ({ user, loading }) => {
       console.error('エラーコード:', error.code);
       console.error('エラーメッセージ:', error.message);
       
-      let errorMessage = 'ログインに失敗しました。';
+      let errorMessage = 'Login failed.';
       
       switch (error.code) {
         case 'auth/popup-blocked':
-          errorMessage = 'ポップアップがブロックされました。ポップアップを許可してください。';
+          errorMessage = 'Popup was blocked. Please allow popups.';
           break;
         case 'auth/popup-closed-by-user':
-          errorMessage = 'ログインがキャンセルされました。';
+          errorMessage = 'Login was cancelled.';
           break;
         case 'auth/unauthorized-domain':
-          errorMessage = 'このドメインは認証が許可されていません。Firebase設定を確認してください。';
+          errorMessage = 'This domain is not authorized. Please check your Firebase settings.';
           break;
         case 'auth/operation-not-allowed':
-          errorMessage = 'Google認証が有効になっていません。Firebase設定を確認してください。';
+          errorMessage = 'Google authentication is not enabled. Please check your Firebase settings.';
           break;
         default:
-          errorMessage = `ログインエラー: ${error.message}`;
+          errorMessage = `Login error: ${error.message}`;
       }
       
       alert(errorMessage);
@@ -54,7 +54,7 @@ const Auth: React.FC<AuthProps> = ({ user, loading }) => {
       <div className="auth-container">
         <div className="auth-loading">
           <div className="spinner"></div>
-          <p>読み込み中...</p>
+          <p>Loading...</p>
         </div>
       </div>
     );
@@ -64,21 +64,21 @@ const Auth: React.FC<AuthProps> = ({ user, loading }) => {
     return (
       <div className="auth-container">
         <div className="auth-card">
-          <h1>家計簿管理システム</h1>
-          <p>セキュアなGoogleアカウント連携により、どのデバイスからでも安全にアクセスできる家計簿システムをご利用いただけます。</p>
+          <h1>Household Ledger System</h1>
+          <p>With secure Google account integration, you can safely access your household ledger system from any device.</p>
           <button onClick={handleSignIn} className="auth-button">
-            <span className="google-icon">⋄</span>
-            Googleアカウントでログイン
+            <span className="google-icon">⧄</span>
+            Sign in with Google
           </button>
           <div className="auth-benefits">
             <div className="benefit-item">
-              ◆ マルチデバイス対応データ同期
+              ◆ Multi-device sync support
             </div>
             <div className="benefit-item">
-              ◆ 自動バックアップシステム
+              ◆ Automatic backup system
             </div>
             <div className="benefit-item">
-              ◆ エンタープライズグレードセキュリティ
+              ◆ Enterprise-grade security
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@ const Auth: React.FC<AuthProps> = ({ user, loading }) => {
         <span className="user-name">{user.displayName}</span>
       </div>
       <button onClick={handleSignOut} className="logout-button">
-        ログアウト
+        Logout
       </button>
     </div>
   );

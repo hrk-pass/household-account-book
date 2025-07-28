@@ -12,7 +12,7 @@ type MealData = {
   id: string;
   date: string;
   mealType: string;
-  ingredients: string[];
+  ingredients: { id: string; usedRate: number }[];
   mealPrepItems?: string[];
   notes?: string;
 };
@@ -38,7 +38,7 @@ const MealHistory = () => {
   // 食事記録を削除する関数（消費率も戻す）
   const handleDeleteMeal = async (mealId: string) => {
     if (!auth.currentUser) {
-      alert('ログインが必要です');
+      alert('Login required');
       return;
     }
 
@@ -52,13 +52,10 @@ const MealHistory = () => {
 
       // 食材の消費率を戻す
       if (mealToDelete.ingredients && mealToDelete.ingredients.length > 0) {
-        // この食事記録で使用された食材の消費率を計算して戻す
-        // 実際の消費率の計算は複雑なので、ここでは簡易的に10%ずつ戻す
-        // より正確な実装のためには、食事記録に消費率の詳細情報を保存する必要がある
-        for (const ingredientId of mealToDelete.ingredients) {
-          const expense = state.expenses.find(e => e.id === ingredientId);
+        for (const ingredient of mealToDelete.ingredients) {
+          const expense = state.expenses.find(e => e.id === ingredient.id);
           if (expense && expense.consumptionRate !== undefined) {
-            const newConsumptionRate = Math.max(0, expense.consumptionRate - 10);
+            const newConsumptionRate = Math.max(0, expense.consumptionRate - ingredient.usedRate);
             await updateExpense({
               ...expense,
               consumptionRate: newConsumptionRate
@@ -90,10 +87,10 @@ const MealHistory = () => {
       fetchMealDates();
       fetchMealsForDate();
       
-      alert('食事記録を削除し、消費率を戻しました');
+      alert('Meal log deleted and consumption rate restored');
     } catch (error) {
       console.error('食事記録の削除中にエラーが発生:', error);
-      alert('削除に失敗しました');
+      alert('Failed to delete');
     }
   };
 
@@ -222,13 +219,13 @@ const MealHistory = () => {
   };
 
   if (!auth.currentUser) {
-    console.log('未認証状態でのレンダリング');
+    console.log('Rendering in unauthenticated state');
     return (
       <div className="meal-history">
         <div className="meal-history-container">
           <header className="meal-history-header">
-            <h2>ログインが必要です</h2>
-            <p>食事履歴を表示するにはログインしてください。</p>
+            <h2>Login required</h2>
+            <p>Please log in to view meal history.</p>
           </header>
         </div>
       </div>
@@ -239,8 +236,8 @@ const MealHistory = () => {
     <div className="meal-history">
       <div className="meal-history-container">
         <header className="meal-history-header">
-          <h2>食事履歴</h2>
-          <p>カレンダーで食事記録を確認</p>
+          <h2>Meal History</h2>
+          <p>Check meal records with the calendar</p>
         </header>
 
         <div className="calendar-container">
@@ -248,12 +245,12 @@ const MealHistory = () => {
             onChange={handleDateChange}
             value={selectedDate}
             tileContent={tileContent}
-            locale="ja-JP"
+            locale="en-US"
           />
         </div>
         
         <div className="meal-details">
-          <h3>{selectedDate.toLocaleDateString('ja-JP')}の食事</h3>
+          <h3>{selectedDate.toLocaleDateString('en-US')} Meals</h3>
           {selectedDateMeals.length > 0 ? (
             <ul className="meal-list">
               {selectedDateMeals.map((meal) => (
@@ -265,10 +262,10 @@ const MealHistory = () => {
                     </div>
                     <div>
                       {meal.mealPrepItems && meal.mealPrepItems.length > 0 ? 
-                        `使用作り置き: ${meal.mealPrepItems.length}個` : 
+                        `Meal Prep Used: ${meal.mealPrepItems.length}` : 
                         meal.ingredients.length > 0 ? 
-                          `使用食材: ${meal.ingredients.length}個` : 
-                          '食材未使用'}
+                          `Ingredients Used: ${meal.ingredients.length}` : 
+                          'No ingredients used'}
                     </div>
                   </div>
                   <div className="meal-actions">
@@ -284,7 +281,7 @@ const MealHistory = () => {
               ))}
             </ul>
           ) : (
-            <p>この日の記録はありません</p>
+            <p>No records for this day</p>
           )}
         </div>
 
@@ -292,22 +289,22 @@ const MealHistory = () => {
         {deleteConfirm && (
           <div className="delete-confirm-overlay">
             <div className="delete-confirm-dialog">
-              <h3>削除の確認</h3>
-              <p>この食事記録を削除しますか？</p>
-              <p>削除すると、使用された食材と作り置きの消費率も戻ります。</p>
-              <p>この操作は取り消せません。</p>
+              <h3>Delete Confirmation</h3>
+              <p>Are you sure you want to delete this meal log?</p>
+              <p>Deleting will also restore the consumption rate of used ingredients and meal preps.</p>
+              <p>This action cannot be undone.</p>
               <div className="delete-confirm-buttons">
                 <button
                   className="cancel-btn"
                   onClick={cancelDelete}
                 >
-                  キャンセル
+                  Cancel
                 </button>
                 <button
                   className="confirm-delete-btn"
                   onClick={() => handleDeleteMeal(deleteConfirm)}
                 >
-                  削除
+                  Delete
                 </button>
               </div>
             </div>

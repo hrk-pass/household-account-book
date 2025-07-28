@@ -4,11 +4,16 @@ import type { Category } from '../types';
 import './WeeklyList.css';
 
 const WeeklyList: React.FC = () => {
-  const { state, updateExpense, deleteExpense, addCategory } = useExpense();
-  const [selectedWeekOffset, setSelectedWeekOffset] = useState(0); // 0 = 今週, -1 = 先週, 1 = 来週
+  const { state, updateExpense, deleteExpense, addCategory, updateCategory, deleteCategory } = useExpense();
+  const [selectedWeekOffset, setSelectedWeekOffset] = useState(0); // 0 = This Week, -1 = Last Week, 1 = Next Week
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryColor, setNewCategoryColor] = useState('#c9a96e');
+  // 編集用
+  const [editCategory, setEditCategory] = useState<Category | null>(null);
+  const [editCategoryName, setEditCategoryName] = useState('');
+  const [editCategoryColor, setEditCategoryColor] = useState('#c9a96e');
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // 選択された週の開始日と終了日を計算
   const getWeekRange = (offset: number) => {
@@ -36,11 +41,11 @@ const WeeklyList: React.FC = () => {
 
   // 週の名前を取得
   const getWeekName = (offset: number) => {
-    if (offset === 0) return '今週';
-    if (offset === -1) return '先週';
-    if (offset === 1) return '来週';
-    if (offset < 0) return `${Math.abs(offset)}週間前`;
-    return `${offset}週間後`;
+    if (offset === 0) return 'This Week';
+    if (offset === -1) return 'Last Week';
+    if (offset === 1) return 'Next Week';
+    if (offset < 0) return `${Math.abs(offset)} weeks ago`;
+    return `${offset} weeks later`;
   };
 
   // カテゴリーを更新
@@ -50,18 +55,18 @@ const WeeklyList: React.FC = () => {
       try {
         await updateExpense({ ...expense, category: categoryId || undefined });
       } catch (error) {
-        alert('カテゴリー更新に失敗しました');
+        alert('Failed to update category');
       }
     }
   };
 
   // 支出を削除
   const handleDeleteExpense = async (expenseId: string) => {
-    if (window.confirm('この支出を削除しますか？')) {
+    if (window.confirm('Delete this expense?')) {
       try {
         await deleteExpense(expenseId);
       } catch (error) {
-        alert('削除に失敗しました');
+        alert('Failed to delete');
       }
     }
   };
@@ -79,7 +84,43 @@ const WeeklyList: React.FC = () => {
     setNewCategoryColor('#c9a96e');
         setShowCategoryModal(false);
       } catch (error) {
-        alert('カテゴリー追加に失敗しました');
+        alert('Failed to add category');
+      }
+    }
+  };
+
+  // カテゴリー編集モーダルを開く
+  const handleEditCategoryOpen = (category: Category) => {
+    setEditCategory(category);
+    setEditCategoryName(category.name);
+    setEditCategoryColor(category.color);
+    setShowEditModal(true);
+  };
+
+  // カテゴリー編集を保存
+  const handleEditCategorySave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editCategory) return;
+    try {
+      await updateCategory({
+        ...editCategory,
+        name: editCategoryName,
+        color: editCategoryColor,
+      });
+      setShowEditModal(false);
+      setEditCategory(null);
+    } catch (error) {
+      alert('カテゴリの更新に失敗しました');
+    }
+  };
+
+  // カテゴリー削除
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (window.confirm('本当にこのカテゴリを削除しますか？（このカテゴリに紐づく支出は「未分類」になります）')) {
+      try {
+        await deleteCategory(categoryId);
+      } catch (error) {
+        alert('カテゴリの削除に失敗しました');
       }
     }
   };
@@ -110,7 +151,7 @@ const WeeklyList: React.FC = () => {
     
     return Array.from(stats.entries()).map(([categoryId, data]) => ({
       categoryId,
-      name: data.category?.name || '未分類',
+      name: data.category?.name || 'Uncategorized',
       color: data.category?.color || '#CCCCCC',
       amount: data.amount,
       count: data.count,
@@ -129,8 +170,8 @@ const WeeklyList: React.FC = () => {
     <div className="weekly-list">
       <div className="weekly-list-container">
         <header className="weekly-list-header">
-          <h1>支出リスト</h1>
-          <p>週ごとの支出を確認し、カテゴリーを設定しましょう</p>
+          <h1>Expense List</h1>
+          <p>Check weekly expenses and set categories</p>
         </header>
 
         {/* 週選択 */}
@@ -139,42 +180,42 @@ const WeeklyList: React.FC = () => {
             onClick={() => setSelectedWeekOffset(selectedWeekOffset - 1)}
             className="week-nav-button prev"
           >
-            ← 前週
+            ← Previous Week
           </button>
           <div className="week-info">
             <h2>{getWeekName(selectedWeekOffset)}</h2>
             <p>
-              {startOfWeek.toLocaleDateString('ja-JP')} 〜 {endOfWeek.toLocaleDateString('ja-JP')}
+              {startOfWeek.toLocaleDateString('en-US')} ~ {endOfWeek.toLocaleDateString('en-US')}
             </p>
           </div>
           <button
             onClick={() => setSelectedWeekOffset(selectedWeekOffset + 1)}
             className="week-nav-button next"
           >
-            来週 →
+            Next Week →
           </button>
         </div>
 
         {/* 週間サマリー */}
         <div className="week-summary">
           <div className="summary-item">
-            <span className="summary-label">総支出</span>
-            <span className="summary-value">¥{totalAmount.toLocaleString()}</span>
+            <span className="summary-label">Total</span>
+            <span className="summary-value">¥{totalAmount.toLocaleString('en-US')}</span>
           </div>
           <div className="summary-item">
-            <span className="summary-label">支出件数</span>
-            <span className="summary-value">{weekExpenses.length}件</span>
+            <span className="summary-label">Count</span>
+            <span className="summary-value">{weekExpenses.length} items</span>
           </div>
           <div className="summary-item">
-            <span className="summary-label">カテゴリー数</span>
-            <span className="summary-value">{categoryStats.length}分類</span>
+            <span className="summary-label">Categories</span>
+            <span className="summary-value">{categoryStats.length}</span>
           </div>
         </div>
 
         {/* カテゴリー別集計 */}
         {categoryStats.length > 0 && (
           <div className="category-stats">
-            <h3>カテゴリー別集計</h3>
+            <h3>Category Breakdown</h3>
             <div className="stats-grid">
               {categoryStats.map((stat) => (
                 <div key={stat.categoryId} className="stat-card">
@@ -184,8 +225,8 @@ const WeeklyList: React.FC = () => {
                   ></div>
                   <div className="stat-content">
                     <div className="stat-name">{stat.name}</div>
-                    <div className="stat-amount">¥{stat.amount.toLocaleString()}</div>
-                    <div className="stat-count">{stat.count}件</div>
+                    <div className="stat-amount">¥{stat.amount.toLocaleString('en-US')}</div>
+                    <div className="stat-count">{stat.count} items</div>
                   </div>
                 </div>
               ))}
@@ -193,28 +234,43 @@ const WeeklyList: React.FC = () => {
           </div>
         )}
 
+        {/* カテゴリ管理セクション */}
+        <div className="category-manage-section">
+          <h3>カテゴリ管理</h3>
+          <div className="category-list">
+            {state.categories.map((category) => (
+              <div key={category.id} className="category-item">
+                <span className="category-color" style={{ backgroundColor: category.color, display: 'inline-block', width: 16, height: 16, borderRadius: '50%', marginRight: 8 }} />
+                <span className="category-name">{category.name}</span>
+                <button className="edit-category-btn" onClick={() => handleEditCategoryOpen(category)} style={{ marginLeft: 8 }}>編集</button>
+                <button className="delete-category-btn" onClick={() => handleDeleteCategory(category.id)} style={{ marginLeft: 4 }}>削除</button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* 支出リスト */}
         <div className="expenses-section">
           <div className="section-header">
-            <h3>支出一覧</h3>
+            <h3>Expense List</h3>
             <button
               onClick={() => setShowCategoryModal(true)}
               className="add-category-button"
             >
-              + カテゴリー追加
+              + Add Category
             </button>
           </div>
 
           {weekExpenses.length === 0 ? (
             <div className="empty-state">
-              <p>この週に支出はありません</p>
+              <p>No expenses this week</p>
             </div>
           ) : (
             <div className="expenses-list">
               {weekExpenses.map((expense) => (
                 <div key={expense.id} className="expense-item">
                   <div className="expense-date">
-                    {new Date(expense.date).toLocaleDateString('ja-JP', {
+                    {new Date(expense.date).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                       weekday: 'short'
@@ -222,6 +278,9 @@ const WeeklyList: React.FC = () => {
                   </div>
                   <div className="expense-content">
                     <div className="expense-description">{expense.description}</div>
+                    {expense.storeName && (
+                      <div className="expense-storeName">{expense.storeName}</div>
+                    )}
                     <div className="expense-amount">¥{expense.amount.toLocaleString()}</div>
                   </div>
                   <div className="expense-category">
@@ -230,7 +289,7 @@ const WeeklyList: React.FC = () => {
                       onChange={(e) => handleCategoryChange(expense.id, e.target.value)}
                       className="category-select"
                     >
-                      <option value="">未分類</option>
+                      <option value="">Uncategorized</option>
                       {state.categories.map((category) => (
                         <option key={category.id} value={category.id}>
                           {category.name}
@@ -242,7 +301,7 @@ const WeeklyList: React.FC = () => {
                     <button
                       onClick={() => handleDeleteExpense(expense.id)}
                       className="delete-button"
-                      title="削除"
+                      title="Delete"
                     >
                       🗑️
                     </button>
@@ -257,22 +316,22 @@ const WeeklyList: React.FC = () => {
         {showCategoryModal && (
           <div className="modal-overlay" onClick={() => setShowCategoryModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h3>新しいカテゴリーを追加</h3>
+              <h3>Add New Category</h3>
               <form onSubmit={handleAddCategory}>
                 <div className="form-group">
-                  <label htmlFor="categoryName">カテゴリー名</label>
+                  <label htmlFor="categoryName">Category Name</label>
                   <input
                     type="text"
                     id="categoryName"
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
-                    placeholder="例: 医療費"
+                    placeholder="e.g. Medical"
                     required
                     className="form-input"
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="categoryColor">色</label>
+                  <label htmlFor="categoryColor">Color</label>
                   <div className="color-picker">
                     {colorOptions.map((color) => (
                       <button
@@ -291,11 +350,50 @@ const WeeklyList: React.FC = () => {
                     onClick={() => setShowCategoryModal(false)}
                     className="cancel-button"
                   >
-                    キャンセル
+                    Cancel
                   </button>
                   <button type="submit" className="submit-button">
-                    追加
+                    Add
                   </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        {/* カテゴリー編集モーダル */}
+        {showEditModal && (
+          <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <h3>カテゴリ編集</h3>
+              <form onSubmit={handleEditCategorySave}>
+                <div className="form-group">
+                  <label htmlFor="editCategoryName">カテゴリ名</label>
+                  <input
+                    type="text"
+                    id="editCategoryName"
+                    value={editCategoryName}
+                    onChange={e => setEditCategoryName(e.target.value)}
+                    required
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="editCategoryColor">色</label>
+                  <div className="color-picker">
+                    {colorOptions.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        className={`color-option ${editCategoryColor === color ? 'selected' : ''}`}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setEditCategoryColor(color)}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="modal-actions">
+                  <button type="button" onClick={() => setShowEditModal(false)} className="cancel-button">キャンセル</button>
+                  <button type="submit" className="submit-button">保存</button>
                 </div>
               </form>
             </div>

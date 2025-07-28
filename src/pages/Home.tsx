@@ -31,87 +31,46 @@ const Home: React.FC = () => {
   const todayExpenses = state.expenses.filter(expense => expense.date === today);
   const todayTotal = todayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-  const quickActions = [
-    {
-      title: '支出記録',
-      description: '新規支出の記録・登録',
-      link: '/daily',
-      icon: '＋',
-      color: '#c9a96e'
-    },
-    {
-      title: '履歴確認',
-      description: '支出履歴の確認・管理',
-      link: '/weekly',
-      icon: '≡',
-      color: '#4ECDC4'
-    },
-    {
-      title: '統計分析',
-      description: '月次レポートと分析',
-      link: '/monthly',
-      icon: '◈',
-      color: '#45B7D1'
-    }
-  ];
-
   return (
     <div className="home">
       <div className="home-container">
         <header className="home-header">
-          <h1>支出管理ダッシュボード</h1>
-          <p>効率的な家計管理で、より良い財務計画を</p>
+          <h1>Household Expense Dashboard</h1>
+          <p>Efficient household management for better financial planning</p>
         </header>
 
         <div className="summary-cards">
           <div className="summary-card today">
             <div className="summary-icon">●</div>
             <div className="summary-content">
-              <h3>今日の支出</h3>
-              <p className="summary-amount">¥{todayTotal.toLocaleString()}</p>
-              <p className="summary-count">{todayExpenses.length}件</p>
+              <h3>Today's Expenses</h3>
+              <p className="summary-amount">¥{todayTotal.toLocaleString('en-US')}</p>
+              <p className="summary-count">{todayExpenses.length} items</p>
             </div>
           </div>
 
           <div className="summary-card week">
             <div className="summary-icon">◆</div>
             <div className="summary-content">
-              <h3>今週の支出</h3>
-              <p className="summary-amount">¥{thisWeekTotal.toLocaleString()}</p>
-              <p className="summary-count">{thisWeekExpenses.length}件</p>
+              <h3>This Week's Expenses</h3>
+              <p className="summary-amount">¥{thisWeekTotal.toLocaleString('en-US')}</p>
+              <p className="summary-count">{thisWeekExpenses.length} items</p>
             </div>
           </div>
 
           <div className="summary-card month">
             <div className="summary-icon">◈</div>
             <div className="summary-content">
-              <h3>今月の支出</h3>
-              <p className="summary-amount">¥{currentMonthTotal.toLocaleString()}</p>
-              <p className="summary-count">{currentMonthExpenses.length}件</p>
+              <h3>This Month's Expenses</h3>
+              <p className="summary-amount">¥{currentMonthTotal.toLocaleString('en-US')}</p>
+              <p className="summary-count">{currentMonthExpenses.length} items</p>
             </div>
-          </div>
-        </div>
-
-        <div className="quick-actions">
-          <h2>クイックアクション</h2>
-          <div className="actions-grid">
-            {quickActions.map((action, index) => (
-              <Link key={index} to={action.link} className="action-card">
-                <div className="action-icon" style={{ backgroundColor: action.color }}>
-                  {action.icon}
-                </div>
-                <div className="action-content">
-                  <h3>{action.title}</h3>
-                  <p>{action.description}</p>
-                </div>
-              </Link>
-            ))}
           </div>
         </div>
 
         {state.expenses.length > 0 && (
           <div className="recent-expenses">
-            <h2>最近の支出</h2>
+            <h2>Recent Expenses</h2>
             <div className="recent-list">
               {state.expenses
                 .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -119,17 +78,17 @@ const Home: React.FC = () => {
                 .map((expense) => (
                   <div key={expense.id} className="recent-item">
                     <div className="recent-date">
-                      {new Date(expense.date).toLocaleDateString('ja-JP')}
+                      {new Date(expense.date).toLocaleDateString('en-US')}
                     </div>
                     <div className="recent-description">{expense.description}</div>
                     <div className="recent-category">
                       {expense.category && (
                         <span className="category-tag">
-                          {state.categories.find(c => c.id === expense.category)?.name || 'その他'}
+                          {state.categories.find(c => c.id === expense.category)?.name || 'Other'}
                         </span>
                       )}
                     </div>
-                    <div className="recent-amount">¥{expense.amount.toLocaleString()}</div>
+                    <div className="recent-amount">¥{expense.amount.toLocaleString('en-US')}</div>
                   </div>
                 ))}
             </div>

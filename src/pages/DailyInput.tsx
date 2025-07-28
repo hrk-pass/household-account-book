@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useExpense } from '../contexts/ExpenseContext';
 import './DailyInput.css';
 
-type TaxType = '外税8%' | '外税10%' | '内税';
+type TaxType = '8% VAT' | '10% VAT' | 'Tax Included';
+type RoundingType = 'Round Down' | 'Round Up';
 
 interface ExpenseItem {
   id: string;
@@ -21,8 +22,9 @@ const DailyInput: React.FC = () => {
     storeName: '',
   });
   
+  const [roundingType, setRoundingType] = useState<RoundingType>('Round Down');
   const [items, setItems] = useState<ExpenseItem[]>([
-    { id: '1', amount: '', description: '', taxType: '外税10%' }
+    { id: '1', amount: '', description: '', taxType: '10% VAT' }
   ]);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +48,7 @@ const DailyInput: React.FC = () => {
       const lastItem = newItems[newItems.length - 1];
       if (lastItem.id === id && (lastItem.amount || lastItem.description)) {
         const newId = (parseInt(lastItem.id) + 1).toString();
-        newItems.push({ id: newId, amount: '', description: '', taxType: '外税10%' });
+        newItems.push({ id: newId, amount: '', description: '', taxType: '10% VAT' });
       }
       
       return newItems;
@@ -58,7 +60,7 @@ const DailyInput: React.FC = () => {
       const newItems = prevItems.filter(item => item.id !== id);
       // 最低1行は残す
       if (newItems.length === 0) {
-        return [{ id: '1', amount: '', description: '', taxType: '外税10%' }];
+        return [{ id: '1', amount: '', description: '', taxType: '10% VAT' }];
       }
       return newItems;
     });
@@ -66,27 +68,39 @@ const DailyInput: React.FC = () => {
 
   const addItem = () => {
     const newId = (Math.max(...items.map(item => parseInt(item.id))) + 1).toString();
-    setItems(prev => [...prev, { id: newId, amount: '', description: '', taxType: '外税10%' }]);
+    setItems(prev => [...prev, { id: newId, amount: '', description: '', taxType: '10% VAT' }]);
   };
 
+  // 端数処理を考慮した税込金額計算
   const calculateTaxIncludedAmount = (amount: number, taxType: TaxType): number => {
+    let taxed = amount;
     switch (taxType) {
-      case '外税8%':
-        return amount * 1.08;
-      case '外税10%':
-        return amount * 1.1;
-      case '内税':
-        return amount;
+      case '8% VAT':
+        taxed = amount * 1.08;
+        break;
+      case '10% VAT':
+        taxed = amount * 1.1;
+        break;
+      case 'Tax Included':
+        taxed = amount;
+        break;
       default:
-        return amount;
+        taxed = amount;
     }
+    if (taxType === 'Tax Included') return taxed;
+    if (roundingType === 'Round Down') {
+      return Math.floor(taxed);
+    } else if (roundingType === 'Round Up') {
+      return Math.ceil(taxed);
+    }
+    return taxed;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.storeName.trim()) {
-      alert('店舗名は必須です');
+      alert('Store name is required');
       return;
     }
 
@@ -95,7 +109,7 @@ const DailyInput: React.FC = () => {
     );
 
     if (validItems.length === 0) {
-      alert('少なくとも1つの明細を入力してください');
+      alert('Please enter at least one item');
       return;
     }
 
@@ -106,7 +120,7 @@ const DailyInput: React.FC = () => {
         const baseAmount = parseFloat(item.amount.replace(/,/g, ''));
         
         if (isNaN(baseAmount) || baseAmount <= 0) {
-          alert(`明細「${item.description}」の金額が正しくありません`);
+          alert(`Amount for "${item.description}" is invalid`);
           setIsSubmitting(false);
           return;
         }
@@ -133,7 +147,7 @@ const DailyInput: React.FC = () => {
       });
 
       // 明細をクリア
-      setItems([{ id: '1', amount: '', description: '', taxType: '外税10%' }]);
+      setItems([{ id: '1', amount: '', description: '', taxType: '10% VAT' }]);
 
       setTimeout(() => {
         setShowSuccess(false);
@@ -141,7 +155,7 @@ const DailyInput: React.FC = () => {
 
     } catch (error) {
       console.error('Error adding expenses:', error);
-      alert('支出の登録に失敗しました');
+      alert('Failed to register expense');
     } finally {
       setIsSubmitting(false);
     }
@@ -171,20 +185,20 @@ const DailyInput: React.FC = () => {
     <div className="daily-input">
       <div className="daily-input-container">
         <header className="daily-input-header">
-          <h1>支出入力</h1>
-          <p>効率的に複数明細を入力</p>
+          <h1>Expense Input</h1>
+          <p>Efficiently input multiple items</p>
         </header>
 
         {showSuccess && (
           <div className="success-message">
-            ◆ {getValidRowCount()}件の支出が正常に記録されました
+            ◆ {getValidRowCount()} expenses have been successfully recorded
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="expense-form">
           <div className="form-header">
             <div className="form-group">
-              <label htmlFor="date">日付</label>
+              <label htmlFor="date">Date</label>
               <input
                 type="date"
                 id="date"
@@ -193,18 +207,19 @@ const DailyInput: React.FC = () => {
                 onChange={handleChange}
                 required
                 className="form-input"
+                lang="en"
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="storeName">店舗名</label>
+              <label htmlFor="storeName">Store Name</label>
               <input
                 type="text"
                 id="storeName"
                 name="storeName"
                 value={formData.storeName}
                 onChange={handleChange}
-                placeholder="店舗名を入力してください"
+                placeholder="Enter store name"
                 required
                 className="form-input"
               />
@@ -213,14 +228,14 @@ const DailyInput: React.FC = () => {
 
           <div className="spreadsheet-section">
             <div className="section-header">
-              <h3>明細一覧</h3>
+              <h3>Item List</h3>
               <div className="spreadsheet-actions">
                 <button
                   type="button"
                   onClick={addItem}
                   className="add-row-button"
                 >
-                  行を追加
+                  Add Row
                 </button>
               </div>
             </div>
@@ -230,10 +245,10 @@ const DailyInput: React.FC = () => {
                 <thead>
                   <tr>
                     <th className="row-header">#</th>
-                    <th className="amount-header">金額 (円)</th>
-                    <th className="tax-type-header">税率</th>
-                    <th className="description-header">支出内容</th>
-                    <th className="action-header">操作</th>
+                    <th className="amount-header">Amount (¥)</th>
+                    <th className="tax-type-header">Tax Type</th>
+                    <th className="description-header">Description</th>
+                    <th className="action-header">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -255,7 +270,7 @@ const DailyInput: React.FC = () => {
                             const formatted = formatNumber(e.target.value);
                             handleItemChange(item.id, 'amount', formatted);
                           }}
-                          placeholder="金額を入力"
+                          placeholder="Enter amount"
                           className="cell-input"
                         />
                       </td>
@@ -265,9 +280,9 @@ const DailyInput: React.FC = () => {
                           onChange={(e) => handleItemChange(item.id, 'taxType', e.target.value as TaxType)}
                           className="tax-type-select"
                         >
-                          <option value="外税8%">外税8%</option>
-                          <option value="外税10%">外税10%</option>
-                          <option value="内税">内税</option>
+                          <option value="8% VAT">8% VAT</option>
+                          <option value="10% VAT">10% VAT</option>
+                          <option value="Tax Included">Tax Included</option>
                         </select>
                       </td>
                       <td className="description-cell">
@@ -275,7 +290,7 @@ const DailyInput: React.FC = () => {
                           type="text"
                           value={item.description}
                           onChange={(e) => handleItemChange(item.id, 'description', e.target.value)}
-                          placeholder="支出内容を入力"
+                          placeholder="Enter description"
                           className="cell-input"
                         />
                       </td>
@@ -285,7 +300,7 @@ const DailyInput: React.FC = () => {
                             type="button"
                             onClick={() => removeItem(item.id)}
                             className="remove-row-button"
-                            title="この行を削除"
+                            title="Remove this row"
                           >
                             ×
                           </button>
@@ -298,11 +313,27 @@ const DailyInput: React.FC = () => {
             </div>
 
             <div className="total-section">
-              <div className="total-amount">
-                合計金額: <span className="total-value">¥{getTotalAmount().toLocaleString()}</span>
-                <span className="total-count">
-                  ({getValidRowCount()}件)
-                </span>
+              <div className="total-amount-with-rounding">
+                <div className="total-amount">
+                  Total: <span className="total-value">¥{getTotalAmount().toLocaleString('en-US')}</span>
+                  <span className="total-count">
+                    ({getValidRowCount()} items)
+                  </span>
+                </div>
+                <div className="rounding-type-group">
+                  <label htmlFor="roundingType" className="rounding-type-label">
+                    Rounding
+                  </label>
+                  <select
+                    id="roundingType"
+                    value={roundingType}
+                    onChange={e => setRoundingType(e.target.value as RoundingType)}
+                    className="rounding-type-select"
+                  >
+                    <option value="Round Down">Round Down</option>
+                    <option value="Round Up">Round Up</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -314,27 +345,28 @@ const DailyInput: React.FC = () => {
               className="cancel-button"
               disabled={isSubmitting}
             >
-              キャンセル
+              Cancel
             </button>
             <button
               type="submit"
               className="submit-button"
               disabled={isSubmitting || !formData.storeName.trim() || getValidRowCount() === 0}
             >
-              {isSubmitting ? '記録中...' : `${getValidRowCount()}件を一括記録`}
+              {isSubmitting ? 'Recording...' : `Register ${getValidRowCount()} items`}
             </button>
           </div>
         </form>
 
         <div className="form-tips">
-          <h3>◆ 操作ガイド</h3>
+          <h3>◆ Operation Guide</h3>
           <ul>
-            <li><strong>Tab/Enter</strong>: 次のフィールドに移動</li>
-            <li><strong>行を追加ボタン</strong>: 新しい明細行を追加</li>
-            <li><strong>×ボタン</strong>: 該当行を削除</li>
-            <li><strong>自動追加</strong>: 最後の行に入力すると自動的に新しい行が追加されます</li>
-            <li><strong>数値フォーマット</strong>: 金額欄はフォーカスを外すと自動的にカンマ区切りになります</li>
-            <li><strong>税率選択</strong>: 各明細の税率を選択できます（外税8%、外税10%、内税）</li>
+            <li><strong>Tab/Enter</strong>: Move to next field</li>
+            <li><strong>Add Row Button</strong>: Add a new item row</li>
+            <li><strong>× Button</strong>: Remove the row</li>
+            <li><strong>Auto Add</strong>: A new row is automatically added when you enter data in the last row</li>
+            <li><strong>Number Format</strong>: Amount field is automatically formatted with commas when focus is lost</li>
+            <li><strong>Tax Type Selection</strong>: Select tax type for each item (8% VAT, 10% VAT, Tax Included)</li>
+            <li><strong>Rounding Selection</strong>: Choose rounding method (Round Down / Round Up) for total calculation</li>
           </ul>
         </div>
       </div>
