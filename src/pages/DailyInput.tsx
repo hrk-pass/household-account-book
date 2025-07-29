@@ -87,12 +87,7 @@ const DailyInput: React.FC = () => {
       default:
         taxed = amount;
     }
-    if (taxType === 'Tax Included') return taxed;
-    if (roundingType === 'Round Down') {
-      return Math.floor(taxed);
-    } else if (roundingType === 'Round Up') {
-      return Math.ceil(taxed);
-    }
+    // 端数処理はここでは行わない
     return taxed;
   };
 
@@ -162,12 +157,19 @@ const DailyInput: React.FC = () => {
   };
 
   const getTotalAmount = () => {
-    return items.reduce((total, item) => {
+    const sum = items.reduce((total, item) => {
       if (!item.amount.trim()) return total;
       const baseAmount = parseFloat(item.amount.replace(/,/g, ''));
       if (isNaN(baseAmount)) return total;
       return total + calculateTaxIncludedAmount(baseAmount, item.taxType);
     }, 0);
+    // 合計金額にのみ端数処理を適用
+    if (roundingType === 'Round Down') {
+      return Math.floor(sum);
+    } else if (roundingType === 'Round Up') {
+      return Math.ceil(sum);
+    }
+    return sum;
   };
 
   const getValidRowCount = () => {
