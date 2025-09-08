@@ -80,7 +80,7 @@ const MealHistory = () => {
       }
 
       // 食事記録を削除
-      await mealLogService.deleteMealLog(auth.currentUser.uid, mealId);
+      await mealLogService.deleteMealLog(mealId);
       setDeleteConfirm(null);
       
       // 削除後にデータを再取得

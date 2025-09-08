@@ -13,21 +13,21 @@ import {
 import { db } from './firebase';
 import type { Expense, Category, MealLog, MealPrepItem } from '../types';
 
-// ユーザーごとのコレクション名を取得
-const getUserCollection = (userId: string, collectionName: string) => {
-  return collection(db, `users/${userId}/${collectionName}`);
+// 共通のコレクション名を取得
+const getCollection = (collectionName: string) => {
+  return collection(db, collectionName);
 };
 
 // 支出関連の操作
 export const expenseService = {
   // 支出を追加
-  async addExpense(userId: string, expense: Omit<Expense, 'id'>): Promise<string> {
+  async addExpense(expense: Omit<Expense, 'id'>): Promise<string> {
     try {
       const expenseWithTimestamp = {
         ...expense,
         date: Timestamp.fromDate(new Date(expense.date))
       };
-      const docRef = await addDoc(getUserCollection(userId, 'expenses'), expenseWithTimestamp);
+      const docRef = await addDoc(getCollection('expenses'), expenseWithTimestamp);
       return docRef.id;
     } catch (error) {
       console.error('支出追加エラー:', error);
@@ -36,9 +36,9 @@ export const expenseService = {
   },
 
   // 支出を更新
-  async updateExpense(userId: string, expenseId: string, updates: Partial<Expense>): Promise<void> {
+  async updateExpense(expenseId: string, updates: Partial<Expense>): Promise<void> {
     try {
-      const expenseDoc = doc(getUserCollection(userId, 'expenses'), expenseId);
+      const expenseDoc = doc(getCollection('expenses'), expenseId);
       const updatesWithTimestamp = updates.date 
         ? { ...updates, date: Timestamp.fromDate(new Date(updates.date)) }
         : updates;
@@ -54,7 +54,7 @@ export const expenseService = {
       setTimeout(async () => {
         try {
           const updatedDoc = await getDocs(query(
-            getUserCollection(userId, 'expenses'),
+            getCollection('expenses'),
             orderBy('date', 'desc')
           ));
           const updatedExpense = updatedDoc.docs.find(doc => doc.id === expenseId);
@@ -77,9 +77,9 @@ export const expenseService = {
   },
 
   // 支出を削除
-  async deleteExpense(userId: string, expenseId: string): Promise<void> {
+  async deleteExpense(expenseId: string): Promise<void> {
     try {
-      const expenseDoc = doc(getUserCollection(userId, 'expenses'), expenseId);
+      const expenseDoc = doc(getCollection('expenses'), expenseId);
       await deleteDoc(expenseDoc);
     } catch (error) {
       console.error('支出削除エラー:', error);
@@ -88,10 +88,10 @@ export const expenseService = {
   },
 
   // 支出一覧を取得
-  async getExpenses(userId: string): Promise<Expense[]> {
+  async getExpenses(): Promise<Expense[]> {
     try {
       const q = query(
-        getUserCollection(userId, 'expenses'),
+        getCollection('expenses'),
         orderBy('date', 'desc')
       );
       const querySnapshot = await getDocs(q);
@@ -110,9 +110,9 @@ export const expenseService = {
   },
 
   // リアルタイムで支出を監視
-  subscribeToExpenses(userId: string, callback: (expenses: Expense[]) => void): () => void {
+  subscribeToExpenses(callback: (expenses: Expense[]) => void): () => void {
     const q = query(
-      getUserCollection(userId, 'expenses'),
+      getCollection('expenses'),
       orderBy('date', 'desc')
     );
     
@@ -167,9 +167,9 @@ export const expenseService = {
 // カテゴリ関連の操作
 export const categoryService = {
   // カテゴリを追加
-  async addCategory(userId: string, category: Omit<Category, 'id'>): Promise<string> {
+  async addCategory(category: Omit<Category, 'id'>): Promise<string> {
     try {
-      const docRef = await addDoc(getUserCollection(userId, 'categories'), category);
+      const docRef = await addDoc(getCollection('categories'), category);
       return docRef.id;
     } catch (error) {
       console.error('カテゴリ追加エラー:', error);
@@ -178,9 +178,9 @@ export const categoryService = {
   },
 
   // カテゴリを更新
-  async updateCategory(userId: string, categoryId: string, updates: Partial<Category>): Promise<void> {
+  async updateCategory(categoryId: string, updates: Partial<Category>): Promise<void> {
     try {
-      const categoryDoc = doc(getUserCollection(userId, 'categories'), categoryId);
+      const categoryDoc = doc(getCollection('categories'), categoryId);
       await updateDoc(categoryDoc, updates);
     } catch (error) {
       console.error('カテゴリ更新エラー:', error);
@@ -189,9 +189,9 @@ export const categoryService = {
   },
 
   // カテゴリを削除
-  async deleteCategory(userId: string, categoryId: string): Promise<void> {
+  async deleteCategory(categoryId: string): Promise<void> {
     try {
-      const categoryDoc = doc(getUserCollection(userId, 'categories'), categoryId);
+      const categoryDoc = doc(getCollection('categories'), categoryId);
       await deleteDoc(categoryDoc);
     } catch (error) {
       console.error('カテゴリ削除エラー:', error);
@@ -200,9 +200,9 @@ export const categoryService = {
   },
 
   // カテゴリ一覧を取得
-  async getCategories(userId: string): Promise<Category[]> {
+  async getCategories(): Promise<Category[]> {
     try {
-      const querySnapshot = await getDocs(getUserCollection(userId, 'categories'));
+      const querySnapshot = await getDocs(getCollection('categories'));
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -214,9 +214,9 @@ export const categoryService = {
   },
 
   // リアルタイムでカテゴリを監視
-  subscribeToCategories(userId: string, callback: (categories: Category[]) => void): () => void {
+  subscribeToCategories(callback: (categories: Category[]) => void): () => void {
     const unsubscribe = onSnapshot(
-      getUserCollection(userId, 'categories'),
+      getCollection('categories'),
       (querySnapshot) => {
         const categories = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -233,9 +233,9 @@ export const categoryService = {
   },
 
   // デフォルトカテゴリを初期化
-  async initializeDefaultCategories(userId: string): Promise<void> {
+  async initializeDefaultCategories(): Promise<void> {
     try {
-      const existingCategories = await this.getCategories(userId);
+      const existingCategories = await this.getCategories();
       if (existingCategories.length > 0) {
         return; // 既にカテゴリが存在する場合は何もしない
       }
@@ -250,7 +250,7 @@ export const categoryService = {
       ];
 
       await Promise.all(
-        defaultCategories.map(category => this.addCategory(userId, category))
+        defaultCategories.map(category => this.addCategory(category))
       );
     } catch (error) {
       console.error('デフォルトカテゴリ初期化エラー:', error);
@@ -262,13 +262,13 @@ export const categoryService = {
 // 食事ログ関連の操作
 export const mealLogService = {
   // 食事ログを追加
-  async addMealLog(userId: string, mealLog: Omit<MealLog, 'id'>): Promise<string> {
+  async addMealLog(mealLog: Omit<MealLog, 'id'>): Promise<string> {
     try {
       const mealLogWithTimestamp = {
         ...mealLog,
         date: Timestamp.fromDate(new Date(mealLog.date))
       };
-      const docRef = await addDoc(getUserCollection(userId, 'mealLogs'), mealLogWithTimestamp);
+      const docRef = await addDoc(getCollection('mealLogs'), mealLogWithTimestamp);
       return docRef.id;
     } catch (error) {
       console.error('食事ログ追加エラー:', error);
@@ -277,9 +277,9 @@ export const mealLogService = {
   },
 
   // 食事ログを更新
-  async updateMealLog(userId: string, mealLogId: string, updates: Partial<MealLog>): Promise<void> {
+  async updateMealLog(mealLogId: string, updates: Partial<MealLog>): Promise<void> {
     try {
-      const mealLogDoc = doc(getUserCollection(userId, 'mealLogs'), mealLogId);
+      const mealLogDoc = doc(getCollection('mealLogs'), mealLogId);
       const updatesWithTimestamp = updates.date 
         ? { ...updates, date: Timestamp.fromDate(new Date(updates.date)) }
         : updates;
@@ -291,9 +291,9 @@ export const mealLogService = {
   },
 
   // 食事ログを削除
-  async deleteMealLog(userId: string, mealLogId: string): Promise<void> {
+  async deleteMealLog(mealLogId: string): Promise<void> {
     try {
-      const mealLogDoc = doc(getUserCollection(userId, 'mealLogs'), mealLogId);
+      const mealLogDoc = doc(getCollection('mealLogs'), mealLogId);
       await deleteDoc(mealLogDoc);
     } catch (error) {
       console.error('食事ログ削除エラー:', error);
@@ -302,10 +302,10 @@ export const mealLogService = {
   },
 
   // 食事ログ一覧を取得
-  async getMealLogs(userId: string): Promise<MealLog[]> {
+  async getMealLogs(): Promise<MealLog[]> {
     try {
       const q = query(
-        getUserCollection(userId, 'mealLogs'),
+        getCollection('mealLogs'),
         orderBy('date', 'desc')
       );
       const querySnapshot = await getDocs(q);
@@ -324,9 +324,9 @@ export const mealLogService = {
   },
 
   // リアルタイムで食事ログを監視
-  subscribeToMealLogs(userId: string, callback: (mealLogs: MealLog[]) => void): () => void {
+  subscribeToMealLogs(callback: (mealLogs: MealLog[]) => void): () => void {
     const q = query(
-      getUserCollection(userId, 'mealLogs'),
+      getCollection('mealLogs'),
       orderBy('date', 'desc')
     );
     
@@ -351,13 +351,13 @@ export const mealLogService = {
 // 作り置き関連の操作
 export const mealPrepService = {
   // 作り置きを追加
-  async addMealPrepItem(userId: string, mealPrepItem: Omit<MealPrepItem, 'id'>): Promise<string> {
+  async addMealPrepItem(mealPrepItem: Omit<MealPrepItem, 'id'>): Promise<string> {
     try {
       const mealPrepItemWithTimestamp = {
         ...mealPrepItem,
         date: Timestamp.fromDate(new Date(mealPrepItem.date))
       };
-      const docRef = await addDoc(getUserCollection(userId, 'mealPrepItems'), mealPrepItemWithTimestamp);
+      const docRef = await addDoc(getCollection('mealPrepItems'), mealPrepItemWithTimestamp);
       return docRef.id;
     } catch (error) {
       console.error('作り置き追加エラー:', error);
@@ -366,9 +366,9 @@ export const mealPrepService = {
   },
 
   // 作り置きを更新
-  async updateMealPrepItem(userId: string, mealPrepItemId: string, updates: Partial<MealPrepItem>): Promise<void> {
+  async updateMealPrepItem(mealPrepItemId: string, updates: Partial<MealPrepItem>): Promise<void> {
     try {
-      const mealPrepItemDoc = doc(getUserCollection(userId, 'mealPrepItems'), mealPrepItemId);
+      const mealPrepItemDoc = doc(getCollection('mealPrepItems'), mealPrepItemId);
       const updatesWithTimestamp = updates.date 
         ? { ...updates, date: Timestamp.fromDate(new Date(updates.date)) }
         : updates;
@@ -380,9 +380,9 @@ export const mealPrepService = {
   },
 
   // 作り置きを削除
-  async deleteMealPrepItem(userId: string, mealPrepItemId: string): Promise<void> {
+  async deleteMealPrepItem(mealPrepItemId: string): Promise<void> {
     try {
-      const mealPrepItemDoc = doc(getUserCollection(userId, 'mealPrepItems'), mealPrepItemId);
+      const mealPrepItemDoc = doc(getCollection('mealPrepItems'), mealPrepItemId);
       await deleteDoc(mealPrepItemDoc);
     } catch (error) {
       console.error('作り置き削除エラー:', error);
@@ -391,10 +391,10 @@ export const mealPrepService = {
   },
 
   // 作り置き一覧を取得
-  async getMealPrepItems(userId: string): Promise<MealPrepItem[]> {
+  async getMealPrepItems(): Promise<MealPrepItem[]> {
     try {
       const q = query(
-        getUserCollection(userId, 'mealPrepItems'),
+        getCollection('mealPrepItems'),
         orderBy('date', 'desc')
       );
       const querySnapshot = await getDocs(q);
@@ -413,9 +413,9 @@ export const mealPrepService = {
   },
 
   // リアルタイムで作り置きを監視
-  subscribeToMealPrepItems(userId: string, callback: (mealPrepItems: MealPrepItem[]) => void): () => void {
+  subscribeToMealPrepItems(callback: (mealPrepItems: MealPrepItem[]) => void): () => void {
     const q = query(
-      getUserCollection(userId, 'mealPrepItems'),
+      getCollection('mealPrepItems'),
       orderBy('date', 'desc')
     );
     

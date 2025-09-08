@@ -147,7 +147,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
       if (user) {
         // ログイン時にデフォルトカテゴリを初期化
         try {
-          await categoryService.initializeDefaultCategories(user.uid);
+          await categoryService.initializeDefaultCategories();
         } catch (error) {
           console.error('デフォルトカテゴリ初期化エラー:', error);
         }
@@ -174,7 +174,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
 
     try {
       // 支出をリアルタイム監視
-      unsubscribeExpenses = expenseService.subscribeToExpenses(user.uid, (expenses) => {
+      unsubscribeExpenses = expenseService.subscribeToExpenses((expenses) => {
         console.log('ExpenseContext - リアルタイム更新受信:', expenses.length, '件');
         const kitchenExpenses = expenses.filter(expense => {
           const category = expense.category;
@@ -190,17 +190,17 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
       });
 
       // カテゴリをリアルタイム監視
-      unsubscribeCategories = categoryService.subscribeToCategories(user.uid, (categories) => {
+      unsubscribeCategories = categoryService.subscribeToCategories((categories) => {
         dispatch({ type: 'SET_CATEGORIES', payload: categories });
       });
 
       // 食事ログをリアルタイム監視
-      unsubscribeMealLogs = mealLogService.subscribeToMealLogs(user.uid, (mealLogs) => {
+      unsubscribeMealLogs = mealLogService.subscribeToMealLogs((mealLogs) => {
         dispatch({ type: 'SET_MEAL_LOGS', payload: mealLogs });
       });
 
       // 作り置きをリアルタイム監視
-      unsubscribeMealPrepItems = mealPrepService.subscribeToMealPrepItems(user.uid, (mealPrepItems) => {
+      unsubscribeMealPrepItems = mealPrepService.subscribeToMealPrepItems((mealPrepItems) => {
         dispatch({ type: 'SET_MEAL_PREP_ITEMS', payload: mealPrepItems });
       });
     } catch (error) {
@@ -219,7 +219,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const addExpense = async (expense: Omit<Expense, 'id'>) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await expenseService.addExpense(user.uid, expense);
+      await expenseService.addExpense(expense);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('支出追加エラー:', error);
@@ -230,7 +230,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const updateExpense = async (expense: Expense) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await expenseService.updateExpense(user.uid, expense.id, expense);
+      await expenseService.updateExpense(expense.id, expense);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('支出更新エラー:', error);
@@ -241,7 +241,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const deleteExpense = async (id: string) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await expenseService.deleteExpense(user.uid, id);
+      await expenseService.deleteExpense(id);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('支出削除エラー:', error);
@@ -253,7 +253,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const addCategory = async (category: Omit<Category, 'id'>) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await categoryService.addCategory(user.uid, category);
+      await categoryService.addCategory(category);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('カテゴリ追加エラー:', error);
@@ -264,7 +264,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const updateCategory = async (category: Category) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await categoryService.updateCategory(user.uid, category.id, category);
+      await categoryService.updateCategory(category.id, category);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('カテゴリ更新エラー:', error);
@@ -275,7 +275,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const deleteCategory = async (id: string) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await categoryService.deleteCategory(user.uid, id);
+      await categoryService.deleteCategory(id);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('カテゴリ削除エラー:', error);
@@ -287,7 +287,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const addMealLog = async (mealLog: Omit<MealLog, 'id'>) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await mealLogService.addMealLog(user.uid, mealLog);
+      await mealLogService.addMealLog(mealLog);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('食事ログ追加エラー:', error);
@@ -298,7 +298,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const updateMealLog = async (mealLog: MealLog) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await mealLogService.updateMealLog(user.uid, mealLog.id, mealLog);
+      await mealLogService.updateMealLog(mealLog.id, mealLog);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('食事ログ更新エラー:', error);
@@ -309,7 +309,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const deleteMealLog = async (id: string) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await mealLogService.deleteMealLog(user.uid, id);
+      await mealLogService.deleteMealLog(id);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('食事ログ削除エラー:', error);
@@ -321,7 +321,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const addMealPrepItem = async (mealPrepItem: Omit<MealPrepItem, 'id'>) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await mealPrepService.addMealPrepItem(user.uid, mealPrepItem);
+      await mealPrepService.addMealPrepItem(mealPrepItem);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('作り置き追加エラー:', error);
@@ -332,7 +332,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   const updateMealPrepItem = async (mealPrepItem: MealPrepItem) => {
     if (!user) throw new Error('ユーザーがログインしていません');
     try {
-      await mealPrepService.updateMealPrepItem(user.uid, mealPrepItem.id, mealPrepItem);
+      await mealPrepService.updateMealPrepItem(mealPrepItem.id, mealPrepItem);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('作り置き更新エラー:', error);
@@ -378,7 +378,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         }
       }
       
-      await mealPrepService.deleteMealPrepItem(user.uid, id);
+      await mealPrepService.deleteMealPrepItem(id);
       // リアルタイム監視により自動的にstateが更新される
     } catch (error) {
       console.error('作り置き削除エラー:', error);
